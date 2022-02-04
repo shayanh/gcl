@@ -2,7 +2,6 @@ package list
 
 import (
 	"github.com/shayanh/gogl/internal"
-	"github.com/shayanh/gogl/iter"
 )
 
 type node[T any] struct {
@@ -34,27 +33,38 @@ func (l *List[T]) Size() int {
 	return l.size
 }
 
-func (l *List[T]) Iter() *Iter[T] {
-	return &Iter[T]{
+// Is this better or having Begin(), End()?
+func (l *List[T]) Iter() Iter[T] {
+	return &FrwIter[T]{
 		node: l.front.next,
 		lst:  l,	
 	}
 }
 
-func (l *List[T]) RIter() *RIter[T] {
-	return &RIter[T]{
+// Is this better or having RBegin(), REnd()?
+func (l *List[T]) RIter() Iter[T] {
+	return &RevIter[T]{
 		node: l.back.prev,
 		lst:  l,
 	}
 }
 
-// TODO: accept an array of values
+// TODO: should we accept an array of values? 
 func (l *List[T]) PushBack(t T) {
 	l.Insert(l.RIter(), t)	
 }
 
+// TODO: should we accept an array of values? 
 func (l *List[T]) PushFront(t T) {
 	l.Insert(l.Iter(), t)
+}
+
+func (l *List[T]) PopBack() {
+	panic("implement me")
+}
+
+func (l *List[T]) PopFront() {
+	panic("implement me")
 }
 
 func (l *List[T]) ForEach(fn func(T)) {
@@ -75,17 +85,18 @@ func (l *List[T]) insertBetween(node, prev, next *node[T]) {
 	l.size += 1
 }
 
-// TODO: accept an array of values
-func (l *List[T]) Insert(it iter.Iter[T], val T) {
+// TODO: should we accept an array of values?
+// Should we return an iter here?
+func (l *List[T]) Insert(it Iter[T], val T) {
 	node := &node[T]{value: val}
 
 	switch tip := it.(type) {
-	case *Iter[T]:
+	case *FrwIter[T]:
 		if tip.lst != l {
 			panic("iterator doesn't belong to this list")
 		}
 		l.insertBetween(node, tip.node.prev, tip.node)
-	case *RIter[T]:
+	case *RevIter[T]:
 		if tip.lst != l {
 			panic("iterator doesn't belong to this list")
 		}
@@ -95,23 +106,41 @@ func (l *List[T]) Insert(it iter.Iter[T], val T) {
 	}
 }
 
-//func (l *List[T]) erase(node *node[T]) {
-	
-//}
+func (l *List[T]) erase(node *node[T]) (*node[T], *node[T]) {
+	prev := node.prev
+	next := node.next
 
-//func (l *List[T]) Erase(it iter.Iter[T]) {
-	//switch tip := it.(type) {
-	//case *Iter[T]:
-		//if tip.lst != l {
-			//panic("iterator doesn't belong to this list")
-		//}
-		//l.insertBetween(node, tip.node.prev, tip.node)
-	//case *RIter[T]:
-		//if tip.lst != l {
-			//panic("iterator doesn't belong to this list")
-		//}
-		//l.insertBetween(node, tip.node, tip.node.next)
-	//default:
-		//panic("wrong iter type")
-	//}
-//}
+	prev.next = next
+	next.prev = prev
+
+	node = nil
+
+	return prev, next
+}
+
+func (l *List[T]) Erase(it Iter[T]) Iter[T] {
+	switch tip := it.(type) {
+	case *FrwIter[T]:
+		if tip.lst != l {
+			panic("iterator doesn't belong to this list")
+		}
+		_, next := l.erase(tip.node)
+		it = nil
+		return &FrwIter[T]{
+			node: next,
+			lst: l,
+		}
+	case *RevIter[T]:
+		if tip.lst != l {
+			panic("iterator doesn't belong to this list")
+		}
+		prev, _ := l.erase(tip.node)
+		it = nil
+		return &RevIter[T]{
+			node: prev,
+			lst: l,
+		}
+	default:
+		panic("wrong iter type")
+	}
+}

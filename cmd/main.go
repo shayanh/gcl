@@ -33,6 +33,18 @@ func main() {
 		fmt.Println(t)
 	})
 
+	it = lst.Iter()
+	it.Next()
+	fmt.Println("it:", it.Value())
+
+	it2 := lst.Erase(it)
+	fmt.Println("it2:", it2.Value())
+
+	fmt.Println("after erase")
+	lst.ForEach(func (t int) {
+		fmt.Println(t)
+	})
+
 	fmt.Println("manual iteration with for loop")
 	for it := lst.Iter(); !it.Done(); it.Next() {
 		fmt.Println(it.Value())

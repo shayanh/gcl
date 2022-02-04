@@ -15,3 +15,7 @@ type MutIter[T any] interface {
 	Iter[T]
 	SetValue(T)
 }
+
+//type Iterable[T any] interface {
+	//Iter() Iter[T]
+//}
