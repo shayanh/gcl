@@ -18,4 +18,4 @@ type MutIter[T any] interface {
 
 // we don't have a struct like container ops to provide all the algorithms (and
 // then embed that struct into containers) because go doesn't support type
-// variance and we cannot use custom pointer types.
+// variance and we cannot use custom iter for container.
