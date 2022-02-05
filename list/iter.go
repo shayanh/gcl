@@ -1,13 +1,5 @@
 package list
 
-type Iter[T any] interface {
-	Next()
-	Prev()
-	Done() bool
-	Value() T
-	SetValue(T)
-}
-
 // FrwIter is a forward iterator.
 type FrwIter[T any] struct {
 	node *node[T]

@@ -5,17 +5,44 @@ import (
 )
 
 type ContainerOps[T any] struct {
-	Iterable iter.Iterable[T]
+	iterable iter.Iterable[T]
 }
 
-func ForEach[T any](it iter.Iter[T], fn func(T)) {
-	for ; !it.Done(); it.Next() {
+func MakeContainerOps[T any](iterable iter.Iterable[T]) ContainerOps[T] {
+	return ContainerOps[T]{
+		iterable: iterable,
+	}
+}
+
+func (ops ContainerOps[T]) Iter() iter.Iter[T] {
+	return ops.iterable.Iter()
+}
+
+func (ops ContainerOps[T]) RIter() iter.Iter[T] {
+	return ops.iterable.RIter()
+}
+
+func (ops ContainerOps[T]) ForEach(fn func(T)) {
+	for it := ops.iterable.Iter(); !it.Done(); it.Next() {
 		fn(it.Value())
 	}
 }
 
-func Reverse[T any](fIt iter.MutIter[T], rIt iter.MutIter[T], length int) {
+type MutContainerOps[T any] struct {
+	ContainerOps[T]
+	mIterable iter.MutIterable[T]
+}
+
+func MakeMutContainerOps[T any](mIterable iter.MutIterable[T]) MutContainerOps[T] {
+	return MutContainerOps[T]{
+		ContainerOps: MakeContainerOps(iter.MutIterableAsIterable(mIterable)),
+		mIterable:    mIterable,
+	}
+}
+
+func (ops MutContainerOps[T]) Reverse(length int) {
 	fIdx, rIdx := 0, length-1
+	fIt, rIt := ops.mIterable.MIter(), ops.mIterable.MRIter()
 	for fIdx < rIdx {
 		fVal, rVal := fIt.Value(), rIt.Value()
 		fIt.SetValue(rVal)

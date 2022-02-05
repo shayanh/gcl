@@ -18,9 +18,9 @@ func main() {
 		fmt.Println(t)
 	})
 
-	lst.Reverse()
+	lst.Reverse(lst.Size())
 	fmt.Println("after reverse")
-	lst.ForEach(func (t int) {
+	lst.ForEach(func(t int) {
 		fmt.Println(t)
 	})
 
@@ -29,7 +29,7 @@ func main() {
 	lst.Insert(it, 100)
 
 	fmt.Println("after insert")
-	lst.ForEach(func (t int) {
+	lst.ForEach(func(t int) {
 		fmt.Println(t)
 	})
 
@@ -41,7 +41,7 @@ func main() {
 	fmt.Println("it2:", it2.Value())
 
 	fmt.Println("after erase")
-	lst.ForEach(func (t int) {
+	lst.ForEach(func(t int) {
 		fmt.Println(t)
 	})
 

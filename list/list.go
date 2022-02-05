@@ -2,6 +2,7 @@ package list
 
 import (
 	"github.com/shayanh/gogl/internal"
+	"github.com/shayanh/gogl/iter"
 )
 
 type node[T any] struct {
@@ -11,7 +12,7 @@ type node[T any] struct {
 }
 
 type List[T any] struct {
-	internal.ContainerOps[T]
+	internal.MutContainerOps[T]
 
 	front *node[T]
 	back  *node[T]
@@ -28,7 +29,7 @@ func NewList[T any]() *List[T] {
 		front: front,
 		back:  back,
 	}
-	l.ContainerOps.Iterable = l
+	l.MutContainerOps = internal.MakeMutContainerOps[T](l)
 	return l
 }
 
@@ -37,27 +38,27 @@ func (l *List[T]) Size() int {
 }
 
 // Is this better or having Begin(), End()?
-func (l *List[T]) Iter() Iter[T] {
+func (l *List[T]) MIter() iter.MutIter[T] {
 	return &FrwIter[T]{
 		node: l.front.next,
-		lst:  l,	
+		lst:  l,
 	}
 }
 
 // Is this better or having RBegin(), REnd()?
-func (l *List[T]) RIter() Iter[T] {
+func (l *List[T]) MRIter() iter.MutIter[T] {
 	return &RevIter[T]{
 		node: l.back.prev,
 		lst:  l,
 	}
 }
 
-// TODO: should we accept an array of values? 
+// TODO: should we accept an array of values?
 func (l *List[T]) PushBack(t T) {
-	l.Insert(l.RIter(), t)	
+	l.Insert(l.RIter(), t)
 }
 
-// TODO: should we accept an array of values? 
+// TODO: should we accept an array of values?
 func (l *List[T]) PushFront(t T) {
 	l.Insert(l.Iter(), t)
 }
@@ -71,11 +72,11 @@ func (l *List[T]) PopFront() {
 }
 
 //func (l *List[T]) ForEach(fn func(T)) {
-	//internal.ForEach[T](l.Iter(), fn)
+//internal.ForEach[T](l.Iter(), fn)
 //}
 
 //func (l *List[T]) Reverse() {
-	//internal.Reverse[T](l.Iter(), l.RIter(), l.size)
+//internal.Reverse[T](l.Iter(), l.RIter(), l.size)
 //}
 
 func (l *List[T]) insertBetween(node, prev, next *node[T]) {
@@ -90,7 +91,7 @@ func (l *List[T]) insertBetween(node, prev, next *node[T]) {
 
 // TODO: should we accept an array of values?
 // Should we return an iter here?
-func (l *List[T]) Insert(it Iter[T], val T) {
+func (l *List[T]) Insert(it iter.Iter[T], val T) {
 	node := &node[T]{value: val}
 
 	switch tip := it.(type) {
@@ -121,7 +122,7 @@ func (l *List[T]) erase(node *node[T]) (*node[T], *node[T]) {
 	return prev, next
 }
 
-func (l *List[T]) Erase(it Iter[T]) Iter[T] {
+func (l *List[T]) Erase(it iter.Iter[T]) iter.Iter[T] {
 	switch tip := it.(type) {
 	case *FrwIter[T]:
 		if tip.lst != l {
@@ -131,7 +132,7 @@ func (l *List[T]) Erase(it Iter[T]) Iter[T] {
 		it = nil
 		return &FrwIter[T]{
 			node: next,
-			lst: l,
+			lst:  l,
 		}
 	case *RevIter[T]:
 		if tip.lst != l {
@@ -141,7 +142,7 @@ func (l *List[T]) Erase(it Iter[T]) Iter[T] {
 		it = nil
 		return &RevIter[T]{
 			node: prev,
-			lst: l,
+			lst:  l,
 		}
 	default:
 		panic("wrong iter type")

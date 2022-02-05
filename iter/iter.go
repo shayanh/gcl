@@ -20,3 +20,26 @@ type Iterable[T any] interface {
 	Iter() Iter[T]
 	RIter() Iter[T]
 }
+
+type MutIterableIterableAdapter[T any] struct {
+	mut MutIterable[T]
+}
+
+func (adapter MutIterableIterableAdapter[T]) Iter() Iter[T] {
+	return adapter.mut.MIter()
+}
+
+func (adapter MutIterableIterableAdapter[T]) RIter() Iter[T] {
+	return adapter.mut.MRIter()
+}
+
+type MutIterable[T any] interface {
+	MIter() MutIter[T]
+	MRIter() MutIter[T]
+}
+
+func MutIterableAsIterable[T any](mutIterable MutIterable[T]) Iterable[T] {
+	return MutIterableIterableAdapter[T]{
+		mut: mutIterable,
+	}
+}
