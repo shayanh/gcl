@@ -60,11 +60,11 @@ func (l *List[T]) PushFront(t T) {
 }
 
 func (l *List[T]) PopBack() {
-	panic("implement me")
+	_ = l.Erase(l.RIter())
 }
 
 func (l *List[T]) PopFront() {
-	panic("implement me")
+	_ = l.Erase(l.Iter())
 }
 
 func (l *List[T]) ForEach(fn func(T)) {
