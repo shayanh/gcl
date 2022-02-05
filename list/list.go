@@ -11,6 +11,8 @@ type node[T any] struct {
 }
 
 type List[T any] struct {
+	internal.ContainerOps[T]
+
 	front *node[T]
 	back  *node[T]
 	size  int
@@ -26,6 +28,7 @@ func NewList[T any]() *List[T] {
 		front: front,
 		back:  back,
 	}
+	l.ContainerOps.Iterable = l
 	return l
 }
 
@@ -67,13 +70,13 @@ func (l *List[T]) PopFront() {
 	_ = l.Erase(l.Iter())
 }
 
-func (l *List[T]) ForEach(fn func(T)) {
-	internal.ForEach[T](l.Iter(), fn)
-}
+//func (l *List[T]) ForEach(fn func(T)) {
+	//internal.ForEach[T](l.Iter(), fn)
+//}
 
-func (l *List[T]) Reverse() {
-	internal.Reverse[T](l.Iter(), l.RIter(), l.size)
-}
+//func (l *List[T]) Reverse() {
+	//internal.Reverse[T](l.Iter(), l.RIter(), l.size)
+//}
 
 func (l *List[T]) insertBetween(node, prev, next *node[T]) {
 	node.next = next
