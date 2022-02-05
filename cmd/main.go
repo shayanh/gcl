@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/shayanh/gogl"
 	"github.com/shayanh/gogl/list"
 )
 
@@ -44,6 +45,9 @@ func main() {
 	lst.ForEach(func (t int) {
 		fmt.Println(t)
 	})
+
+	fmt.Println("max:", lst.MaxFunc(gogl.Less[int]))
+	fmt.Println("min:", lst.MinFunc(gogl.Less[int]))
 
 	fmt.Println("manual iteration with for loop")
 	for it := lst.Iter(); !it.Done(); it.Next() {

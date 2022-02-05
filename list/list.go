@@ -1,6 +1,7 @@
 package list
 
 import (
+	"github.com/shayanh/gogl"
 	"github.com/shayanh/gogl/internal"
 )
 
@@ -144,3 +145,12 @@ func (l *List[T]) Erase(it Iter[T]) Iter[T] {
 		panic("wrong iter type")
 	}
 }
+
+func (l *List[T]) MaxFunc(less gogl.LessFn[T]) T {
+	return internal.MaxFunc[T](l.Iter(), less)
+}
+
+func (l *List[T]) MinFunc(less gogl.LessFn[T]) T {
+	return internal.MinFunc[T](l.Iter(), less)
+}
+
