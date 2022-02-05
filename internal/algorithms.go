@@ -4,10 +4,6 @@ import (
 	"github.com/shayanh/gogl/iter"
 )
 
-//type ContainerOps[T any] struct {
-	//Iterable[T]
-//}
-
 func ForEach[T any](it iter.Iter[T], fn func(T)) {
 	for ; !it.Done(); it.Next() {
 		fn(it.Value())
