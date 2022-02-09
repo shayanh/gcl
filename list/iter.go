@@ -23,7 +23,7 @@ func (it *FrwIter[T]) Prev() {
 }
 
 func (it *FrwIter[T]) Done() bool {
-	return it.node == it.lst.back
+	return it.node == it.lst.tail || it.node == it.lst.head
 }
 
 func (it *FrwIter[T]) Value() T {
@@ -32,6 +32,13 @@ func (it *FrwIter[T]) Value() T {
 
 func (it *FrwIter[T]) SetValue(val T) {
 	it.node.value = val
+}
+
+func (it *FrwIter[T]) clone() *FrwIter[T] {
+	return &FrwIter[T]{
+		node: it.node,
+		lst:  it.lst,
+	}
 }
 
 // RIter is a reverse iterator.
@@ -49,7 +56,7 @@ func (it *RevIter[T]) Prev() {
 }
 
 func (it *RevIter[T]) Done() bool {
-	return it.node == it.lst.front
+	return it.node == it.lst.head || it.node == it.lst.tail
 }
 
 func (it *RevIter[T]) Value() T {
@@ -58,4 +65,11 @@ func (it *RevIter[T]) Value() T {
 
 func (it *RevIter[T]) SetValue(val T) {
 	it.node.value = val
+}
+
+func (it *RevIter[T]) clone() *RevIter[T] {
+	return &RevIter[T]{
+		node: it.node,
+		lst:  it.lst,
+	}
 }

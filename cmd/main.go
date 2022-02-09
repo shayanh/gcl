@@ -3,59 +3,25 @@ package main
 import (
 	"fmt"
 
-	"github.com/shayanh/gogl"
 	"github.com/shayanh/gogl/list"
 )
 
+func printList[T any](lst *list.List[T]) {
+	fmt.Print("lst = ")
+	lst.ForEach(func(t T) {
+		fmt.Print(t, ", ")
+	})
+	fmt.Println()
+}
+
 func main() {
-	lst := list.NewList[int]()
-	lst.PushBack(1)
-	lst.PushBack(2)
-	lst.PushBack(7)
+	lst := list.NewList[int](1, 2, 7)
 	lst.PushFront(-9)
+	printList(lst)
 
-	fmt.Println("foreach")
-	lst.ForEach(func(t int) {
-		fmt.Println(t)
-	})
+	lst.Insert(lst.Iter(), 11, 12)
+	printList(lst)
 
-	lst.Reverse()
-	fmt.Println("after reverse")
-	lst.ForEach(func (t int) {
-		fmt.Println(t)
-	})
-
-	it := lst.Iter()
-	it.Next()
-	lst.Insert(it, 100)
-
-	fmt.Println("after insert")
-	lst.ForEach(func (t int) {
-		fmt.Println(t)
-	})
-
-	it = lst.Iter()
-	it.Next()
-	fmt.Println("it:", it.Value())
-
-	it2 := lst.Erase(it)
-	fmt.Println("it2:", it2.Value())
-
-	fmt.Println("after erase")
-	lst.ForEach(func (t int) {
-		fmt.Println(t)
-	})
-
-	fmt.Println("max:", lst.MaxFunc(gogl.Less[int]))
-	fmt.Println("min:", lst.MinFunc(gogl.Less[int]))
-
-	fmt.Println("manual iteration with for loop")
-	for it := lst.Iter(); !it.Done(); it.Next() {
-		fmt.Println(it.Value())
-	}
-
-	fmt.Println("reverse iteration with for loop")
-	for it := lst.RIter(); !it.Done(); it.Next() {
-		fmt.Println(it.Value())
-	}
+	lst.Insert(lst.RIter(), 13, 14)
+	printList(lst)
 }
