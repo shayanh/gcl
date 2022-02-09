@@ -1,4 +1,4 @@
-package iter
+package iters
 
 // We don't have a struct like container ops to provide all the algorithms (and
 // then embed that struct into containers) because go doesn't support type

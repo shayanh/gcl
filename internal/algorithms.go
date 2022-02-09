@@ -2,16 +2,16 @@ package internal
 
 import (
 	"github.com/shayanh/gogl"
-	"github.com/shayanh/gogl/iter"
+	"github.com/shayanh/gogl/iters"
 )
 
-func ForEach[T any](it iter.Iter[T], fn func(T)) {
+func ForEach[T any](it iters.Iter[T], fn func(T)) {
 	for ; !it.Done(); it.Next() {
 		fn(it.Value())
 	}
 }
 
-func Reverse[T any](fIt iter.MutIter[T], rIt iter.MutIter[T], length int) {
+func Reverse[T any](fIt iters.MutIter[T], rIt iters.MutIter[T], length int) {
 	fIdx, rIdx := 0, length-1
 	for fIdx < rIdx {
 		fVal, rVal := fIt.Value(), rIt.Value()
@@ -29,7 +29,7 @@ func Reverse[T any](fIt iter.MutIter[T], rIt iter.MutIter[T], length int) {
 	}
 }
 
-func MaxFunc[T any](it iter.Iter[T], less gogl.LessFn[T]) (max T) {
+func MaxFunc[T any](it iters.Iter[T], less gogl.LessFn[T]) (max T) {
 	if it.Done() {
 		return
 	}
@@ -43,7 +43,7 @@ func MaxFunc[T any](it iter.Iter[T], less gogl.LessFn[T]) (max T) {
 	return
 }
 
-func MinFunc[T any](it iter.Iter[T], less gogl.LessFn[T]) (min T) {
+func MinFunc[T any](it iters.Iter[T], less gogl.LessFn[T]) (min T) {
 	if it.Done() {
 		return
 	}
