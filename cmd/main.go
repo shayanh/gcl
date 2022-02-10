@@ -10,7 +10,7 @@ import (
 
 func printList[T any](lst *list.List[T]) {
 	fmt.Print("list = ")
-	lst.ForEach(func(t T) {
+	iters.ForEach[T](list.Begin(lst), func(t T) {
 		fmt.Print(t, ", ")
 	})
 	fmt.Println()
@@ -18,24 +18,22 @@ func printList[T any](lst *list.List[T]) {
 
 func main() {
 	lst := list.NewList[int](1, 2, 7)
-	lst.PushFront(-9)
+	list.PushFront(lst, -9)
 	printList(lst)
 
-	lst.Insert(lst.Iter(), 11, 12)
+	list.Insert(lst, list.Begin(lst), 11, 12)
 	printList(lst)
 
-	lst.Insert(lst.RIter(), 13, 14)
+	list.Insert(lst, list.RBegin(lst), 13, 14)
 	printList(lst)
 
-	lst2 := list.NewList[int]()
-	iters.Map[int, int](lst.Iter(), func(t int) int {
+	lst2 := list.NewList[int](iters.Map[int, int](list.Begin(lst), func(t int) int {
 		return t * 2
-	}, lst2.PushBack)
+	})...)
 	printList(lst2)
 
-	lst3 := list.NewList[string]()
-	iters.Map[int, string](lst.Iter(), func(t int) string {
+	lst3 := list.NewList[string](iters.Map[int, string](list.Begin(lst), func(t int) string {
 		return strconv.Itoa(t) + "a"
-	}, lst3.PushBack)
+	})...)
 	printList(lst3)
 }

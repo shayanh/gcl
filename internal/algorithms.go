@@ -5,12 +5,6 @@ import (
 	"github.com/shayanh/gogl/iters"
 )
 
-func ForEach[T any](it iters.Iter[T], fn func(T)) {
-	for ; !it.Done(); it.Next() {
-		fn(it.Value())
-	}
-}
-
 func Reverse[T any](fIt iters.MutIter[T], rIt iters.MutIter[T], length int) {
 	fIdx, rIdx := 0, length-1
 	for fIdx < rIdx {

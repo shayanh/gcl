@@ -1,7 +1,6 @@
 package list
 
 import (
-	"github.com/shayanh/gogl"
 	"github.com/shayanh/gogl/internal"
 )
 
@@ -28,54 +27,49 @@ func NewList[T any](elems ...T) *List[T] {
 		tail: tail,
 	}
 
-	for _, elem := range elems {
-		l.PushBack(elem)
-	}
+	PushBack(l, elems...)
 	return l
 }
 
-func (l *List[T]) Size() int {
+func Len[T any](l *List[T]) int {
 	return l.size
 }
 
-// Iter returns a forward iterator to the beginning.
-func (l *List[T]) Iter() Iter[T] {
+
+// Begin returns a forward iterator to the beginning.
+func Begin[T any](l *List[T]) Iter[T] {
 	return &FrwIter[T]{
 		node: l.head.next,
 		lst:  l,
 	}
 }
 
-// RIter returns a reverse iterator to the beginning (in the reverse order).
-func (l *List[T]) RIter() Iter[T] {
+// RBegin returns a reverse iterator to the beginning (in the reverse order).
+func RBegin[T any](l *List[T]) Iter[T] {
 	return &RevIter[T]{
 		node: l.tail.prev,
 		lst:  l,
 	}
 }
 
-func (l *List[T]) PushBack(t T) {
-	_ = l.Insert(l.RIter(), t)
+func PushBack[T any](l *List[T], elems ...T) {
+	_ = Insert(l, RBegin(l), elems...)
 }
 
-func (l *List[T]) PushFront(t T) {
-	_ = l.Insert(l.Iter(), t)
+func PushFront[T any](l *List[T], elems ...T) {
+	_ = Insert(l, Begin(l), elems...)
 }
 
-func (l *List[T]) PopBack() {
-	_ = l.Erase(l.RIter())
+func PopBack[T any](l *List[T]) {
+	_ = Erase(l, RBegin(l))
 }
 
-func (l *List[T]) PopFront() {
-	_ = l.Erase(l.Iter())
+func PopFront[T any](l *List[T]) {
+	_ = Erase(l, Begin(l))
 }
 
-func (l *List[T]) ForEach(fn func(T)) {
-	internal.ForEach[T](l.Iter(), fn)
-}
-
-func (l *List[T]) Reverse() {
-	internal.Reverse[T](l.Iter(), l.RIter(), l.size)
+func Reverse[T any](l *List[T]) {
+	internal.Reverse[T](Begin(l), RBegin(l), l.size)
 }
 
 func (l *List[T]) insertBetween(node, prev, next *node[T]) {
@@ -88,7 +82,7 @@ func (l *List[T]) insertBetween(node, prev, next *node[T]) {
 	l.size += 1
 }
 
-func (l *List[T]) Insert(it Iter[T], elems ...T) Iter[T] {
+func Insert[T any](l *List[T], it Iter[T], elems ...T) Iter[T] {
 	switch typedIt := it.(type) {
 	case *FrwIter[T]:
 		if typedIt.lst != l {
@@ -140,7 +134,7 @@ func (l *List[T]) erase(node *node[T]) (*node[T], *node[T]) {
 	return prev, next
 }
 
-func (l *List[T]) Erase(it Iter[T]) Iter[T] {
+func Erase[T any](l *List[T], it Iter[T]) Iter[T] {
 	switch typedIt := it.(type) {
 	case *FrwIter[T]:
 		if typedIt.lst != l {
@@ -163,12 +157,4 @@ func (l *List[T]) Erase(it Iter[T]) Iter[T] {
 	default:
 		panic("wrong iter type")
 	}
-}
-
-func (l *List[T]) MaxFunc(less gogl.LessFn[T]) T {
-	return internal.MaxFunc[T](l.Iter(), less)
-}
-
-func (l *List[T]) MinFunc(less gogl.LessFn[T]) T {
-	return internal.MinFunc[T](l.Iter(), less)
 }
