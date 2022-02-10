@@ -1,4 +1,4 @@
-package list
+package lists
 
 type Iter[T any] interface {
 	Next()

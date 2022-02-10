@@ -1,4 +1,4 @@
-package list
+package lists
 
 import (
 	"github.com/shayanh/gogl/internal"
@@ -61,11 +61,11 @@ func PushFront[T any](l *List[T], elems ...T) {
 }
 
 func PopBack[T any](l *List[T]) {
-	_ = Erase(l, RBegin(l))
+	_ = Delete(l, RBegin(l))
 }
 
 func PopFront[T any](l *List[T]) {
-	_ = Erase(l, Begin(l))
+	_ = Delete(l, Begin(l))
 }
 
 func Reverse[T any](l *List[T]) {
@@ -134,7 +134,7 @@ func (l *List[T]) erase(node *node[T]) (*node[T], *node[T]) {
 	return prev, next
 }
 
-func Erase[T any](l *List[T], it Iter[T]) Iter[T] {
+func Delete[T any](l *List[T], it Iter[T]) Iter[T] {
 	switch typedIt := it.(type) {
 	case *FrwIter[T]:
 		if typedIt.lst != l {
