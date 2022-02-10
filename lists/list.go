@@ -119,7 +119,7 @@ func Insert[T any](l *List[T], it Iter[T], elems ...T) Iter[T] {
 		if typedIt.lst != l {
 			panic("iterator doesn't belong to this list")
 		}
-		rit := typedIt.clone()
+		rit := typedIt.Clone().(Iter[T])
 		for i, elem := range elems {
 			node := &node[T]{value: elem}
 			l.insertBetween(node, typedIt.node.prev, typedIt.node)
@@ -135,7 +135,7 @@ func Insert[T any](l *List[T], it Iter[T], elems ...T) Iter[T] {
 		if typedIt.lst != l {
 			panic("iterator doesn't belong to this list")
 		}
-		rit := typedIt.clone()
+		rit := typedIt.Clone().(Iter[T])
 		for i := len(elems) - 1; i >= 0; i-- {
 			elem := elems[i]
 			node := &node[T]{value: elem}

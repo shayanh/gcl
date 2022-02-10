@@ -21,6 +21,11 @@ func main() {
 	lists.PushFront(lst, -9)
 	printList(lst)
 
+	sum := iters.Reduce[int](lists.Begin(lst), func(a, b int) int {
+		return a + b
+	})
+	fmt.Println("sum =", sum)
+
 	lists.Insert(lst, lists.Begin(lst), 11, 12)
 	printList(lst)
 
@@ -32,8 +37,12 @@ func main() {
 	})...)
 	printList(lst2)
 
-	lst3 := lists.NewList[string](iters.Map[int, string](lists.Begin(lst), func(t int) string {
+	it := lists.Begin(lst)
+	fmt.Println("it.Done() =", it.Done())
+	lst3 := lists.NewList[string](iters.Map[int, string](it, func(t int) string {
 		return strconv.Itoa(t) + "a"
 	})...)
 	printList(lst3)
+
+	fmt.Println("it.Done() =", it.Done())
 }

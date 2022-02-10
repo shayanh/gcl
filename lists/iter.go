@@ -1,10 +1,13 @@
 package lists
 
+import "github.com/shayanh/gogl/iters"
+
 type Iter[T any] interface {
 	Next()
 	Prev()
 	Done() bool
 	Value() T
+	Clone() iters.Iter[T]
 	SetValue(T)
 }
 
@@ -34,7 +37,7 @@ func (it *FrwIter[T]) SetValue(val T) {
 	it.node.value = val
 }
 
-func (it *FrwIter[T]) clone() *FrwIter[T] {
+func (it *FrwIter[T]) Clone() iters.Iter[T] {
 	return &FrwIter[T]{
 		node: it.node,
 		lst:  it.lst,
@@ -67,7 +70,7 @@ func (it *RevIter[T]) SetValue(val T) {
 	it.node.value = val
 }
 
-func (it *RevIter[T]) clone() *RevIter[T] {
+func (it *RevIter[T]) Clone() iters.Iter[T] {
 	return &RevIter[T]{
 		node: it.node,
 		lst:  it.lst,
