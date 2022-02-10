@@ -1,6 +1,7 @@
 package lists
 
 import (
+	"github.com/shayanh/gogl"
 	"github.com/shayanh/gogl/internal"
 )
 
@@ -50,6 +51,36 @@ func RBegin[T any](l *List[T]) Iter[T] {
 		node: l.tail.prev,
 		lst:  l,
 	}
+}
+
+func Equal[T comparable](l1, l2 *List[T]) bool {
+	if l1.size != l2.size {
+		return false
+	}
+	it1, it2 := Begin(l1), Begin(l2)
+	for !it1.Done() {
+		if it1.Value() != it2.Value() {
+			return false
+		}
+		it1.Next()
+		it2.Next()
+	}
+	return true
+}
+
+func EqualFunc[T any](l1, l2 *List[T], eq gogl.EqualFn[T]) bool {
+	if l1.size != l2.size {
+		return false
+	}
+	it1, it2 := Begin(l1), Begin(l2)
+	for !it1.Done() {
+		if !eq(it1.Value(), it2.Value()) {
+			return false
+		}
+		it1.Next()
+		it2.Next()
+	}
+	return true
 }
 
 func PushBack[T any](l *List[T], elems ...T) {
@@ -122,7 +153,7 @@ func Insert[T any](l *List[T], it Iter[T], elems ...T) Iter[T] {
 	}
 }
 
-func (l *List[T]) erase(node *node[T]) (*node[T], *node[T]) {
+func (l *List[T]) deleteNode(node *node[T]) (*node[T], *node[T]) {
 	prev := node.prev
 	next := node.next
 
@@ -130,6 +161,8 @@ func (l *List[T]) erase(node *node[T]) (*node[T], *node[T]) {
 	next.prev = prev
 
 	node = nil
+
+	l.size -= 1
 
 	return prev, next
 }
@@ -140,7 +173,7 @@ func Delete[T any](l *List[T], it Iter[T]) Iter[T] {
 		if typedIt.lst != l {
 			panic("iterator doesn't belong to this list")
 		}
-		_, next := l.erase(typedIt.node)
+		_, next := l.deleteNode(typedIt.node)
 		return &FrwIter[T]{
 			node: next,
 			lst:  l,
@@ -149,7 +182,7 @@ func Delete[T any](l *List[T], it Iter[T]) Iter[T] {
 		if typedIt.lst != l {
 			panic("iterator doesn't belong to this list")
 		}
-		prev, _ := l.erase(typedIt.node)
+		prev, _ := l.deleteNode(typedIt.node)
 		return &RevIter[T]{
 			node: prev,
 			lst:  l,
