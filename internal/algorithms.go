@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"github.com/shayanh/gogl"
 	"github.com/shayanh/gogl/iters"
 )
 
@@ -21,32 +20,4 @@ func Reverse[T any](fIt iters.MutIter[T], rIt iters.MutIter[T], length int) {
 			panic("bad iterator")
 		}
 	}
-}
-
-func MaxFunc[T any](it iters.Iter[T], less gogl.LessFn[T]) (max T) {
-	if it.Done() {
-		return
-	}
-
-	max = it.Value()
-	for ; !it.Done(); it.Next() {
-		if less(max, it.Value()) {
-			max = it.Value()
-		}
-	}
-	return
-}
-
-func MinFunc[T any](it iters.Iter[T], less gogl.LessFn[T]) (min T) {
-	if it.Done() {
-		return
-	}
-
-	min = it.Value()
-	for ; !it.Done(); it.Next() {
-		if less(it.Value(), min) {
-			min = it.Value()
-		}
-	}
-	return
 }

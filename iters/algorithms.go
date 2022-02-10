@@ -1,5 +1,11 @@
 package iters
 
+import (
+	"constraints"
+
+	"github.com/shayanh/gogl"
+)
+
 func ForEach[T any](cit Iter[T], fn func(T)) {
 	it := cit.Clone()
 	for ; !it.Done(); it.Next() {
@@ -46,4 +52,35 @@ func Filter[T any](cit Iter[T], pred func(T) bool) []T {
 		}
 	}
 	return res
+}
+
+func Max[T constraints.Ordered](cit Iter[T]) (max T) {
+	it := cit.Clone()
+	if it.Done() {
+		return
+	}
+
+	max = it.Value()
+	for ; !it.Done(); it.Next() {
+		if max < it.Value() {
+			max = it.Value()
+		}
+	}
+	return
+}
+
+func MaxFunc[T any](cit Iter[T], less gogl.LessFn[T]) (max T) {
+	it := cit.Clone()
+	if it.Done() {
+		return
+	}
+
+	max = it.Value()
+	for ; !it.Done(); it.Next() {
+		if less(max, it.Value()) {
+			max = it.Value()
+		}
+	}
+	return
+
 }

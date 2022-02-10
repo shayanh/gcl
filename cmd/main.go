@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/shayanh/gogl/lists"
 	"github.com/shayanh/gogl/iters"
+	"github.com/shayanh/gogl/lists"
 )
 
 func printList[T any](lst *lists.List[T]) {

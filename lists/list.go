@@ -36,7 +36,6 @@ func Len[T any](l *List[T]) int {
 	return l.size
 }
 
-
 // Begin returns a forward iterator to the beginning.
 func Begin[T any](l *List[T]) Iter[T] {
 	return &FrwIter[T]{
@@ -97,6 +96,14 @@ func PopBack[T any](l *List[T]) {
 
 func PopFront[T any](l *List[T]) {
 	_ = Delete(l, Begin(l))
+}
+
+func Front[T any](l *List[T]) T {
+	return Begin(l).Value()
+}
+
+func Back[T any](l *List[T]) T {
+	return RBegin(l).Value()
 }
 
 func Reverse[T any](l *List[T]) {
