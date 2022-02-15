@@ -39,7 +39,7 @@ func Len[T any](l *List[T]) int {
 // Begin returns a forward iterator to the beginning.
 func Begin[T any](l *List[T]) Iter[T] {
 	return &FrwIter[T]{
-		node: l.head.next,
+		node: l.head,
 		lst:  l,
 	}
 }
@@ -47,7 +47,7 @@ func Begin[T any](l *List[T]) Iter[T] {
 // RBegin returns a reverse iterator to the beginning (in the reverse order).
 func RBegin[T any](l *List[T]) Iter[T] {
 	return &RevIter[T]{
-		node: l.tail.prev,
+		node: l.tail,
 		lst:  l,
 	}
 }
@@ -57,12 +57,12 @@ func Equal[T comparable](l1, l2 *List[T]) bool {
 		return false
 	}
 	it1, it2 := Begin(l1), Begin(l2)
-	for !it1.Done() {
-		if it1.Value() != it2.Value() {
+	for it1.HasNext() {
+		v1 := it1.Next()
+		v2 := it2.Next()
+		if v1 != v2 {
 			return false
 		}
-		it1.Next()
-		it2.Next()
 	}
 	return true
 }
@@ -72,38 +72,38 @@ func EqualFunc[T any](l1, l2 *List[T], eq gogl.EqualFn[T]) bool {
 		return false
 	}
 	it1, it2 := Begin(l1), Begin(l2)
-	for !it1.Done() {
-		if !eq(it1.Value(), it2.Value()) {
+	for it1.HasNext() {
+		v1 := it1.Next()
+		v2 := it2.Next()
+		if !eq(v1, v2) {
 			return false
 		}
-		it1.Next()
-		it2.Next()
 	}
 	return true
 }
 
 func PushBack[T any](l *List[T], elems ...T) {
-	_ = Insert(l, RBegin(l), elems...)
+	Insert(RBegin(l), elems...)
 }
 
 func PushFront[T any](l *List[T], elems ...T) {
-	_ = Insert(l, Begin(l), elems...)
+	Insert(Begin(l), elems...)
 }
 
 func PopBack[T any](l *List[T]) {
-	_ = Delete(l, RBegin(l))
+	_ = Delete(RBegin(l))
 }
 
 func PopFront[T any](l *List[T]) {
-	_ = Delete(l, Begin(l))
+	_ = Delete(Begin(l))
 }
 
 func Front[T any](l *List[T]) T {
-	return Begin(l).Value()
+	return Begin(l).Next()
 }
 
 func Back[T any](l *List[T]) T {
-	return RBegin(l).Value()
+	return RBegin(l).Next()
 }
 
 func Reverse[T any](l *List[T]) {
@@ -120,41 +120,26 @@ func (l *List[T]) insertBetween(node, prev, next *node[T]) {
 	l.size += 1
 }
 
-func Insert[T any](l *List[T], it Iter[T], elems ...T) Iter[T] {
+// Insert inserts values after the iterator.
+func Insert[T any](it Iter[T], elems ...T) {
 	switch typedIt := it.(type) {
 	case *FrwIter[T]:
-		if typedIt.lst != l {
-			panic("iterator doesn't belong to this list")
-		}
-		rit := typedIt.Clone().(Iter[T])
-		for i, elem := range elems {
-			node := &node[T]{value: elem}
-			l.insertBetween(node, typedIt.node.prev, typedIt.node)
-			if i == 0 {
-				rit = &FrwIter[T]{
-					node: node,
-					lst:  l,
-				}
-			}
-		}
-		return rit
-	case *RevIter[T]:
-		if typedIt.lst != l {
-			panic("iterator doesn't belong to this list")
-		}
-		rit := typedIt.Clone().(Iter[T])
+		require(typedIt.Valid(), "iterator must be valid")
+		require(typedIt.node.next != nil, "bad iterator")
+
 		for i := len(elems) - 1; i >= 0; i-- {
 			elem := elems[i]
 			node := &node[T]{value: elem}
-			l.insertBetween(node, typedIt.node, typedIt.node.next)
-			if i == 0 {
-				rit = &RevIter[T]{
-					node: node,
-					lst:  l,
-				}
-			}
+			typedIt.lst.insertBetween(node, typedIt.node, typedIt.node.next)
 		}
-		return rit
+	case *RevIter[T]:
+		require(typedIt.Valid(), "iterator must be valid")
+		require(typedIt.node.prev != nil, "bad iterator")
+
+		for _, elem := range elems {
+			node := &node[T]{value: elem}
+			typedIt.lst.insertBetween(node, typedIt.node.prev, typedIt.node)
+		}
 	default:
 		panic("wrong iter type")
 	}
@@ -174,25 +159,30 @@ func (l *List[T]) deleteNode(node *node[T]) (*node[T], *node[T]) {
 	return prev, next
 }
 
-func Delete[T any](l *List[T], it Iter[T]) Iter[T] {
+// Delete deletes the node that the given iterator is pointing to.
+// The given iterator will be invalidated and cannot be used. The
+// user should use the returned iterator.
+func Delete[T any](it Iter[T]) Iter[T] {
 	switch typedIt := it.(type) {
 	case *FrwIter[T]:
-		if typedIt.lst != l {
-			panic("iterator doesn't belong to this list")
-		}
-		_, next := l.deleteNode(typedIt.node)
+		require(typedIt.Valid(), "iterator must be valid")
+		require(typedIt.node.prev != nil && typedIt.node.next != nil,
+			"bad iterator")
+
+		prev, _ := typedIt.lst.deleteNode(typedIt.node)
 		return &FrwIter[T]{
-			node: next,
-			lst:  l,
+			node: prev,
+			lst:  typedIt.lst,
 		}
 	case *RevIter[T]:
-		if typedIt.lst != l {
-			panic("iterator doesn't belong to this list")
-		}
-		prev, _ := l.deleteNode(typedIt.node)
+		require(typedIt.Valid(), "iterator must be valid")
+		require(typedIt.node.prev != nil && typedIt.node.next != nil,
+			"bad iterator")
+
+		_, next := typedIt.lst.deleteNode(typedIt.node)
 		return &RevIter[T]{
-			node: prev,
-			lst:  l,
+			node: next,
+			lst:  typedIt.lst,
 		}
 	default:
 		panic("wrong iter type")

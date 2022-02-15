@@ -1,14 +1,16 @@
 package lists
 
-import "github.com/shayanh/gogl/iters"
-
 type Iter[T any] interface {
-	Next()
-	Prev()
-	Done() bool
-	Value() T
-	Clone() iters.Iter[T]
-	SetValue(T)
+	HasNext() bool
+	Next() T
+	Set(T)
+	Valid() bool
+}
+
+func require(check bool, failMsg string) {
+	if !check {
+		panic(failMsg)
+	}
 }
 
 // FrwIter is a forward iterator.
@@ -17,62 +19,61 @@ type FrwIter[T any] struct {
 	lst  *List[T]
 }
 
-func (it *FrwIter[T]) Next() {
+func (it *FrwIter[T]) HasNext() bool {
+	if it.node == nil {
+		return false
+	}
+	return it.node.next != it.lst.tail
+}
+
+func (it *FrwIter[T]) Next() T {
+	require(it.Valid(), "iterator must be valid")
+	require(it.HasNext(), "iterator must have next")
+
 	it.node = it.node.next
-}
-
-func (it *FrwIter[T]) Prev() {
-	it.node = it.node.prev
-}
-
-func (it *FrwIter[T]) Done() bool {
-	return it.node == it.lst.tail || it.node == it.lst.head
-}
-
-func (it *FrwIter[T]) Value() T {
 	return it.node.value
 }
 
-func (it *FrwIter[T]) SetValue(val T) {
+func (it *FrwIter[T]) Set(val T) {
+	require(it.Valid(), "iterator must be valid")
+	require(it.node != it.lst.head && it.node != it.lst.tail, "iterator must have a value")
+
 	it.node.value = val
 }
 
-func (it *FrwIter[T]) Clone() iters.Iter[T] {
-	return &FrwIter[T]{
-		node: it.node,
-		lst:  it.lst,
-	}
+func (it *FrwIter[T]) Valid() bool {
+	return it.node != nil
 }
 
-// RIter is a reverse iterator.
+// RevIter is a reverse iterator.
 type RevIter[T any] struct {
 	node *node[T]
 	lst  *List[T]
 }
 
-func (it *RevIter[T]) Next() {
-	it.node = it.node.prev
+func (it *RevIter[T]) HasNext() bool {
+	if it.node == nil {
+		return false
+	}
+	return it.node.prev != it.lst.head
 }
 
-func (it *RevIter[T]) Prev() {
+func (it *RevIter[T]) Next() T {
+	require(it.Valid(), "iterator must be valid")
+	require(it.HasNext(), "iterator must have next")
+
 	it.node = it.node.next
-}
-
-func (it *RevIter[T]) Done() bool {
-	return it.node == it.lst.head || it.node == it.lst.tail
-}
-
-func (it *RevIter[T]) Value() T {
 	return it.node.value
 }
 
-func (it *RevIter[T]) SetValue(val T) {
+func (it *RevIter[T]) Set(val T) {
+	require(it.Valid(), "iterator must be valid")
+	require(it.node != it.lst.head && it.node != it.lst.tail,
+		"iterator must have a value")
+
 	it.node.value = val
 }
 
-func (it *RevIter[T]) Clone() iters.Iter[T] {
-	return &RevIter[T]{
-		node: it.node,
-		lst:  it.lst,
-	}
+func (it *RevIter[T]) Valid() bool {
+	return it.node != nil
 }

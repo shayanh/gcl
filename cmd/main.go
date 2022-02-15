@@ -26,10 +26,10 @@ func main() {
 	})
 	fmt.Println("sum =", sum)
 
-	lists.Insert(lst, lists.Begin(lst), 11, 12)
+	lists.Insert(lists.Begin(lst), 11, 12)
 	printList(lst)
 
-	lists.Insert(lst, lists.RBegin(lst), 13, 14)
+	lists.Insert(lists.RBegin(lst), 13, 14)
 	printList(lst)
 
 	lst2 := lists.NewList[int](iters.Map[int, int](lists.Begin(lst), func(t int) int {
@@ -38,11 +38,8 @@ func main() {
 	printList(lst2)
 
 	it := lists.Begin(lst)
-	fmt.Println("it.Done() =", it.Done())
 	lst3 := lists.NewList[string](iters.Map[int, string](it, func(t int) string {
 		return strconv.Itoa(t) + "a"
 	})...)
 	printList(lst3)
-
-	fmt.Println("it.Done() =", it.Done())
 }
