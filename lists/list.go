@@ -91,19 +91,23 @@ func PushFront[T any](l *List[T], elems ...T) {
 }
 
 func PopBack[T any](l *List[T]) {
+	require(l.size > 0, "list cannot be empty")
 	_ = Delete(RIter(l))
 }
 
 func PopFront[T any](l *List[T]) {
+	require(l.size > 0, "list cannot be empty")
 	_ = Delete(Iter(l))
 }
 
 func Front[T any](l *List[T]) T {
-	return Iter(l).Next()
+	require(l.size > 0, "list cannot be empty")
+	return l.head.next.value
 }
 
 func Back[T any](l *List[T]) T {
-	return RIter(l).Next()
+	require(l.size > 0, "list cannot be empty")
+	return l.tail.prev.value
 }
 
 func Reverse[T any](l *List[T]) {
