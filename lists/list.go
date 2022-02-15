@@ -36,16 +36,16 @@ func Len[T any](l *List[T]) int {
 	return l.size
 }
 
-// Begin returns a forward iterator to the beginning.
-func Begin[T any](l *List[T]) Iter[T] {
+// Iter returns a forward iterator to the beginning.
+func Iter[T any](l *List[T]) Iterator[T] {
 	return &FrwIter[T]{
 		node: l.head,
 		lst:  l,
 	}
 }
 
-// RBegin returns a reverse iterator to the beginning (in the reverse order).
-func RBegin[T any](l *List[T]) Iter[T] {
+// RIter returns a reverse iterator to the beginning (in the reverse order).
+func RIter[T any](l *List[T]) Iterator[T] {
 	return &RevIter[T]{
 		node: l.tail,
 		lst:  l,
@@ -56,7 +56,7 @@ func Equal[T comparable](l1, l2 *List[T]) bool {
 	if l1.size != l2.size {
 		return false
 	}
-	it1, it2 := Begin(l1), Begin(l2)
+	it1, it2 := Iter(l1), Iter(l2)
 	for it1.HasNext() {
 		v1 := it1.Next()
 		v2 := it2.Next()
@@ -71,7 +71,7 @@ func EqualFunc[T any](l1, l2 *List[T], eq gogl.EqualFn[T]) bool {
 	if l1.size != l2.size {
 		return false
 	}
-	it1, it2 := Begin(l1), Begin(l2)
+	it1, it2 := Iter(l1), Iter(l2)
 	for it1.HasNext() {
 		v1 := it1.Next()
 		v2 := it2.Next()
@@ -83,31 +83,31 @@ func EqualFunc[T any](l1, l2 *List[T], eq gogl.EqualFn[T]) bool {
 }
 
 func PushBack[T any](l *List[T], elems ...T) {
-	Insert(RBegin(l), elems...)
+	Insert(RIter(l), elems...)
 }
 
 func PushFront[T any](l *List[T], elems ...T) {
-	Insert(Begin(l), elems...)
+	Insert(Iter(l), elems...)
 }
 
 func PopBack[T any](l *List[T]) {
-	_ = Delete(RBegin(l))
+	_ = Delete(RIter(l))
 }
 
 func PopFront[T any](l *List[T]) {
-	_ = Delete(Begin(l))
+	_ = Delete(Iter(l))
 }
 
 func Front[T any](l *List[T]) T {
-	return Begin(l).Next()
+	return Iter(l).Next()
 }
 
 func Back[T any](l *List[T]) T {
-	return RBegin(l).Next()
+	return RIter(l).Next()
 }
 
 func Reverse[T any](l *List[T]) {
-	internal.Reverse[T](Begin(l), RBegin(l), l.size)
+	internal.Reverse[T](Iter(l), RIter(l), l.size)
 }
 
 func (l *List[T]) insertBetween(node, prev, next *node[T]) {
@@ -121,7 +121,7 @@ func (l *List[T]) insertBetween(node, prev, next *node[T]) {
 }
 
 // Insert inserts values after the iterator.
-func Insert[T any](it Iter[T], elems ...T) {
+func Insert[T any](it Iterator[T], elems ...T) {
 	switch typedIt := it.(type) {
 	case *FrwIter[T]:
 		require(typedIt.Valid(), "iterator must be valid")
@@ -162,7 +162,7 @@ func (l *List[T]) deleteNode(node *node[T]) (*node[T], *node[T]) {
 // Delete deletes the node that the given iterator is pointing to.
 // The given iterator will be invalidated and cannot be used. The
 // user should use the returned iterator.
-func Delete[T any](it Iter[T]) Iter[T] {
+func Delete[T any](it Iterator[T]) Iterator[T] {
 	switch typedIt := it.(type) {
 	case *FrwIter[T]:
 		require(typedIt.Valid(), "iterator must be valid")

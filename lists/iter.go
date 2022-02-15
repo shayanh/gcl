@@ -1,6 +1,6 @@
 package lists
 
-type Iter[T any] interface {
+type Iterator[T any] interface {
 	HasNext() bool
 	Next() T
 	Set(T)

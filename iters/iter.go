@@ -1,6 +1,6 @@
 package iters
 
-type Iter[T any] interface {
+type Iterator[T any] interface {
 	// HasNext tests whether the iterator can advance.
 	HasNext() bool
 
@@ -8,8 +8,8 @@ type Iter[T any] interface {
 	Next() T
 }
 
-type MutIter[T any] interface {
-	Iter[T]
+type MutIterator[T any] interface {
+	Iterator[T]
 
 	// Set replaces the last value returned by Next with the given value.
 	Set(T)

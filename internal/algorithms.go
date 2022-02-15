@@ -4,7 +4,7 @@ import (
 	"github.com/shayanh/gogl/iters"
 )
 
-func Reverse[T any](fIt iters.MutIter[T], rIt iters.MutIter[T], length int) {
+func Reverse[T any](fIt iters.MutIterator[T], rIt iters.MutIterator[T], length int) {
 	fIdx, rIdx := 0, length-1
 	for fIdx < rIdx {
 		if !fIt.HasNext() || !rIt.HasNext() {

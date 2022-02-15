@@ -6,13 +6,13 @@ import (
 	"github.com/shayanh/gogl"
 )
 
-func ForEach[T any](it Iter[T], fn func(T)) {
+func ForEach[T any](it Iterator[T], fn func(T)) {
 	for it.HasNext() {
 		fn(it.Next())
 	}
 }
 
-func Map[T any, V any](it Iter[T], fn func(T) V) []V {
+func Map[T any, V any](it Iterator[T], fn func(T) V) []V {
 	var res []V
 	for it.HasNext() {
 		res = append(res, fn(it.Next()))
@@ -20,7 +20,7 @@ func Map[T any, V any](it Iter[T], fn func(T) V) []V {
 	return res
 }
 
-func Reduce[T any](it Iter[T], fn func(T, T) T) (acc T) {
+func Reduce[T any](it Iterator[T], fn func(T, T) T) (acc T) {
 	if !it.HasNext() {
 		return
 	}
@@ -31,7 +31,7 @@ func Reduce[T any](it Iter[T], fn func(T, T) T) (acc T) {
 	return
 }
 
-func Fold[T any, V any](it Iter[T], fn func(V, T) V, init V) (acc V) {
+func Fold[T any, V any](it Iterator[T], fn func(V, T) V, init V) (acc V) {
 	acc = init
 	for it.HasNext() {
 		acc = fn(acc, it.Next())
@@ -39,7 +39,7 @@ func Fold[T any, V any](it Iter[T], fn func(V, T) V, init V) (acc V) {
 	return
 }
 
-func Filter[T any](it Iter[T], pred func(T) bool) []T {
+func Filter[T any](it Iterator[T], pred func(T) bool) []T {
 	var res []T
 	for it.HasNext() {
 		v := it.Next()
@@ -50,7 +50,7 @@ func Filter[T any](it Iter[T], pred func(T) bool) []T {
 	return res
 }
 
-func Max[T constraints.Ordered](it Iter[T]) (max T) {
+func Max[T constraints.Ordered](it Iterator[T]) (max T) {
 	if !it.HasNext() {
 		return
 	}
@@ -65,7 +65,7 @@ func Max[T constraints.Ordered](it Iter[T]) (max T) {
 	return
 }
 
-func MaxFunc[T any](it Iter[T], less gogl.LessFn[T]) (max T) {
+func MaxFunc[T any](it Iterator[T], less gogl.LessFn[T]) (max T) {
 	if !it.HasNext() {
 		return
 	}
