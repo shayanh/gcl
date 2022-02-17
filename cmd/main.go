@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/shayanh/gogl/iters"
 	"github.com/shayanh/gogl/lists"
@@ -32,14 +31,18 @@ func main() {
 	lists.Insert(lists.RIter(lst), 13, 14)
 	printList(lst)
 
-	lst2 := lists.NewList[int](iters.Map[int, int](lists.Iter(lst), func(t int) int {
+	lst2 := lists.FromIter[int](iters.Map[int, int](lists.Iter(lst), func(t int) int {
 		return t * 2
-	})...)
+	}))
 	printList(lst2)
 
-	it := lists.Iter(lst)
-	lst3 := lists.NewList[string](iters.Map[int, string](it, func(t int) string {
-		return strconv.Itoa(t) + "a"
-	})...)
-	printList(lst3)
+	iters.ForEach[int](iters.Filter[int](lists.Iter(lst), 
+		func (t int) bool {
+			return t % 2 == 0
+		}),
+		func (t int) {
+			fmt.Print(t, ", ")
+		},
+	)
+	fmt.Println()
 }

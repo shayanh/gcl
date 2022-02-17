@@ -12,12 +12,21 @@ func ForEach[T any](it Iterator[T], fn func(T)) {
 	}
 }
 
-func Map[T any, V any](it Iterator[T], fn func(T) V) []V {
-	var res []V
-	for it.HasNext() {
-		res = append(res, fn(it.Next()))
-	}
-	return res
+type mapIter[T any, V any] struct {
+	wrappedIt Iterator[T]
+	fn func(T) V
+}
+
+func (it *mapIter[T, V]) HasNext() bool {
+	return it.wrappedIt.HasNext()
+}
+
+func (it *mapIter[T, V]) Next() V {
+	return it.fn(it.wrappedIt.Next())
+}
+
+func Map[T any, V any](it Iterator[T], fn func(T) V) Iterator[V] {
+	return &mapIter[T, V]{wrappedIt: it, fn: fn}
 }
 
 func Reduce[T any](it Iterator[T], fn func(T, T) T) (acc T) {
@@ -39,22 +48,62 @@ func Fold[T any, V any](it Iterator[T], fn func(V, T) V, init V) (acc V) {
 	return
 }
 
-func Filter[T any](it Iterator[T], pred func(T) bool) []T {
-	var res []T
-	for it.HasNext() {
-		v := it.Next()
-		if pred(v) {
-			res = append(res, v)
+type nextState int
+
+const (
+	unknown nextState = iota 
+	hasNext
+	noNext
+)
+
+type filterIter[T any] struct {
+	wrappedIt Iterator[T]
+	pred func(T) bool
+	state nextState	
+	next T
+}
+
+func (it *filterIter[T]) findNext() {
+	for it.wrappedIt.HasNext() {
+		v := it.wrappedIt.Next()
+		if it.pred(v) {
+			it.state = hasNext
+			it.next = v
+			return
 		}
 	}
-	return res
+	it.state = noNext
+}
+
+func (it *filterIter[T]) HasNext() bool {
+	if it.state == unknown {
+		it.findNext()
+	}
+	if it.state == hasNext {
+		return true
+	}
+	return false
+}
+
+func (it *filterIter[T]) Next() T {
+	if it.state == unknown {
+		it.findNext()
+	}
+	if it.state == noNext {
+		panic("iterator does not have next")
+	}
+	it.state = unknown
+	return it.next
+}
+
+func Filter[T any](it Iterator[T], pred func(T) bool) Iterator[T] {
+	return &filterIter[T]{wrappedIt: it, pred: pred}
 }
 
 func Max[T constraints.Ordered](it Iterator[T]) (max T) {
 	if !it.HasNext() {
 		return
 	}
-
 	max = it.Next()
 	for it.HasNext() {
 		v := it.Next()
@@ -69,7 +118,6 @@ func MaxFunc[T any](it Iterator[T], less gogl.LessFn[T]) (max T) {
 	if !it.HasNext() {
 		return
 	}
-
 	max = it.Next()
 	for it.HasNext() {
 		v := it.Next()

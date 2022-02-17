@@ -2,6 +2,7 @@ package lists
 
 import (
 	"github.com/shayanh/gogl"
+	"github.com/shayanh/gogl/iters"
 	"github.com/shayanh/gogl/internal"
 )
 
@@ -29,6 +30,14 @@ func NewList[T any](elems ...T) *List[T] {
 	}
 
 	PushBack(l, elems...)
+	return l
+}
+
+func FromIter[T any](it iters.Iterator[T]) *List[T] {
+	l := NewList[T]()
+	for it.HasNext() {
+		PushBack(l, it.Next())
+	}
 	return l
 }
 
