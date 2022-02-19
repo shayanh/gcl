@@ -1,5 +1,6 @@
 package lists
 
+// Iterator defines the general list iterator interface.
 type Iterator[T any] interface {
 	HasNext() bool
 	Next() T

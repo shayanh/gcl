@@ -25,6 +25,11 @@ func (it *mapIter[T, V]) Next() V {
 	return it.fn(it.wrappedIt.Next())
 }
 
+// Map applies the given function `fn` on the given iterator `it` and
+// returns a new iterator. Map moves the given iterator `it` to its end
+// such after a Map call we would have `it.HasNext() == false`.
+// Map is lazy, in a way that if you don't consume the returned iterator
+// nothing will happen.
 func Map[T any, V any](it Iterator[T], fn func(T) V) Iterator[V] {
 	return &mapIter[T, V]{wrappedIt: it, fn: fn}
 }
