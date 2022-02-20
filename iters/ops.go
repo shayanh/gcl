@@ -1,7 +1,7 @@
 package iters
 
 import (
-	"constraints"
+	"golang.org/x/exp/constraints"
 
 	"github.com/shayanh/gogl"
 )
@@ -14,7 +14,7 @@ func ForEach[T any](it Iterator[T], fn func(T)) {
 
 type mapIter[T any, V any] struct {
 	wrappedIt Iterator[T]
-	fn func(T) V
+	fn        func(T) V
 }
 
 func (it *mapIter[T, V]) HasNext() bool {
@@ -56,16 +56,16 @@ func Fold[T any, V any](it Iterator[T], fn func(V, T) V, init V) (acc V) {
 type nextState int
 
 const (
-	unknown nextState = iota 
+	unknown nextState = iota
 	hasNext
 	noNext
 )
 
 type filterIter[T any] struct {
 	wrappedIt Iterator[T]
-	pred func(T) bool
-	state nextState	
-	next T
+	pred      func(T) bool
+	state     nextState
+	next      T
 }
 
 func (it *filterIter[T]) findNext() {
@@ -129,6 +129,42 @@ func MaxFunc[T any](it Iterator[T], less gogl.LessFn[T]) (max T) {
 		if less(max, v) {
 			max = v
 		}
+	}
+	return
+}
+
+func Min[T constraints.Ordered](it Iterator[T]) (min T) {
+	if !it.HasNext() {
+		return
+	}
+	min = it.Next()
+	for it.HasNext() {
+		v := it.Next()
+		if min > v {
+			min = v
+		}
+	}
+	return
+}
+
+func MinFunc[T constraints.Ordered](it Iterator[T], less gogl.LessFn[T]) (min T) {
+	if !it.HasNext() {
+		return
+	}
+	min = it.Next()
+	for it.HasNext() {
+		v := it.Next()
+		if less(v, min) {
+			min = v
+		}
+	}
+	return
+}
+
+func Sum[T gogl.Number](it Iterator[T]) (sum T) {
+	sum = 0
+	for it.HasNext() {
+		sum += it.Next()
 	}
 	return
 }

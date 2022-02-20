@@ -27,8 +27,6 @@ type Iterator[T any] interface {
 	Next() T
 }
 
-func Advance(Iter[T], n int)
-
 func ForEach(Iter[T], fn)
 
 func Map(Iter[T], func(T) V) []V
@@ -38,6 +36,8 @@ func Filter(Iter[T], func(T) bool) []V
 func Reduce(Iter[T], func(T, T) T) V
 func Fold(Iter[T], func(V, T) V, V) V
 
+func Find(Iter[T], func(T) bool) (T, bool)
+
 func Sum(Iter[T]) Integer
 
 func Max(Iter[T]) T
@@ -46,6 +46,12 @@ func Min(Iter[T]) T
 func MaxFunc(Iter[T], lessFn) T
 func MinFunc(Iter[T], lessFn) T
 
+func Zip(it1 Iter[T], it2 Iter[V]) Iter[Zipped[T, V]]
+
+// Not sure
+func Advance(Iter[T], n int)
+
+// Not sure
 func Merge(it1, it2 Iter[T]) []T
 func MergeFunc(it1, it2 Iter[T], lessFn) []T
 ```
@@ -71,6 +77,8 @@ type List[T] struct
 
 func NewList[T](elems ...T) *List[T]
 
+func FromIter(iters.Iter[T]) *List[T]
+
 func Len(l) int
 
 func ّIter(l) Iter[T]
@@ -78,6 +86,9 @@ func RIter(l) Iter[T]
 
 func Equal(l1, l2 *List[T]) bool
 func EqualFunc(l1, l2 *List[T], eqFn) bool
+
+func Compare(l1, l2 *List[T]) int
+func CompareFunc(l1, l2 *List[T], lessFn) int
 
 func PushBack(l, ...T)
 func PushFront(l, ...T)
@@ -96,17 +107,17 @@ func Reverse(l)
 func Sort(l)
 func SortFunc(l, lessFn)
 
+func IsSorted(l) bool
+func IsSortedFunc(l, lessFn) bool
+
 func Compact(l)
 func CompactFunc(l, lessFn)
 
-func MaxElem(l) Iter[T]
-func MaxElemFunc(l, lessFn) Iter[T]
+func Index(l, T) int
+func IndexFunc(l, T, eqFn) int
 
-func MinElem(l) Iter[T]
-func MinElemFunc(l, lessFn) Iter[T]
-
-func Find(l, T) Iter[T]
-func FindFunc(l, T, lessFn) Iter[T]
+func Pos(l, T) (Iter[T], bool)
+func PosFunc(l, T, eqFn) (Iter[T], bool)
 func Contains(l, T) bool
 
 func Clone() *List[T]

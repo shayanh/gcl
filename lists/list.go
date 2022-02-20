@@ -1,11 +1,13 @@
 // Package list provides a doubly linked list.
-
 package lists
 
 import (
+	"sort"
+
 	"github.com/shayanh/gogl"
-	"github.com/shayanh/gogl/iters"
 	"github.com/shayanh/gogl/internal"
+	"github.com/shayanh/gogl/iters"
+	"golang.org/x/exp/constraints"
 )
 
 type node[T any] struct {
@@ -94,6 +96,45 @@ func EqualFunc[T any](l1, l2 *List[T], eq gogl.EqualFn[T]) bool {
 		}
 	}
 	return true
+}
+
+// Compare compares the elements of l1 and l2.
+func Compare[T constraints.Ordered](l1, l2 *List[T]) int {
+	it1, it2 := Iter(l1), Iter(l2)
+	for it1.HasNext() {
+		if !it2.HasNext() {
+			return +1
+		}
+		v1, v2 := it1.Next(), it2.Next()
+		switch {
+		case v1 < v2:
+			return -1
+		case v1 > v2:
+			return +1
+		}
+	}
+	if it2.HasNext() {
+		return -1
+	}
+	return 0
+}
+
+func CompareFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], cmp gogl.CompareFn[T1, T2]) int {
+	it1, it2 := Iter(l1), Iter(l2)
+	for it1.HasNext() {
+		if !it2.HasNext() {
+			return +1
+		}
+		v1, v2 := it1.Next(), it2.Next()
+		if c := cmp(v1, v2); c != 0 {
+			return c
+		}
+	}
+	if it2.HasNext() {
+		return -1
+	}
+	return 0
+
 }
 
 func PushBack[T any](l *List[T], elems ...T) {
@@ -215,4 +256,134 @@ func Delete[T any](it Iterator[T]) Iterator[T] {
 	default:
 		panic("wrong iter type")
 	}
+}
+
+func toSlice[T any](l *List[T]) []T {
+	var res []T
+	for it := Iter(l); it.HasNext(); {
+		res = append(res, it.Next())
+	}
+	return res
+}
+
+func Sort[T constraints.Ordered](l *List[T]) {
+	slice := toSlice(l)
+	sort.Slice(slice, func(i, j int) bool {
+		return slice[i] < slice[j]
+	})
+	it := Iter(l)
+	for _, v := range slice {
+		it.Next()
+		it.Set(v)
+	}
+}
+
+func SortFunc[T any](l *List[T], less gogl.LessFn[T]) {
+	slice := toSlice(l)
+	sort.Slice(slice, func(i, j int) bool {
+		return less(slice[i], slice[j])
+	})
+	it := Iter(l)
+	for _, v := range slice {
+		it.Next()
+		it.Set(v)
+	}
+}
+
+func IsSorted[T constraints.Ordered](l *List[T]) bool {
+	it := RIter(l)
+	if !it.HasNext() {
+		return true
+	}
+	vr := it.Next()
+	for it.HasNext() {
+		vl := it.Next()
+		if vr < vl {
+			return false
+		}
+		vr = vl
+	}
+	return true
+}
+
+func IsSortedFunc[T any](l *List[T], less gogl.LessFn[T]) bool {
+	it := RIter(l)
+	if !it.HasNext() {
+		return true
+	}
+	vr := it.Next()
+	for it.HasNext() {
+		vl := it.Next()
+		if less(vr, vl) {
+			return false
+		}
+		vr = vl
+	}
+	return true
+}
+
+func Compact[T comparable](l *List[T]) {
+	panic("impelement me")
+}
+
+func CompactFunc[T any](l *List[T], eq gogl.EqualFn[T]) {
+	panic("implement me")
+}
+
+func Index[T comparable](l *List[T], v T) int {
+	i := 0
+	it := Iter(l)
+	for it.HasNext() {
+		if it.Next() == v {
+			return i
+		}
+		i++
+	}
+	return -1
+}
+
+func IndexFunc[T comparable](l *List[T], v T, eq gogl.EqualFn[T]) int {
+	i := 0
+	it := Iter(l)
+	for it.HasNext() {
+		if eq(it.Next(), v) {
+			return i
+		}
+		i++
+	}
+	return -1
+}
+
+func Pos[T comparable](l *List[T], v T) (Iterator[T], bool) {
+	it := Iter(l)
+	for it.HasNext() {
+		if it.Next() == v {
+			return it, true
+		}
+	}
+	return it, false
+}
+
+func PosFunc[T any](l *List[T], v T, eq gogl.EqualFn[T]) (Iterator[T], bool) {
+	it := Iter(l)
+	for it.HasNext() {
+		if eq(it.Next(), v) {
+			return it, true
+		}
+	}
+	return it, false
+}
+
+func Contains[T comparable](l *List[T], v T) bool {
+	_, res := Pos(l, v)
+	return res
+}
+
+func Clone[T any](l *List[T]) *List[T] {
+	res := NewList[T]()
+	it := Iter(l)
+	for it.HasNext() {
+		PushBack(res, it.Next())
+	}
+	return res
 }

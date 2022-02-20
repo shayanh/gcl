@@ -1,6 +1,5 @@
 // Package iters defines the general iterator interface and provides operations
 // on the given iterators.
-
 package iters
 
 // Iterator defines the general iterator interface. Iterator makes it
