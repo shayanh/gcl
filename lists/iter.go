@@ -5,6 +5,9 @@ type Iterator[T any] interface {
 	HasNext() bool
 	Next() T
 	Set(T)
+
+	// Valid reports whether the iterator is valid. An iterator might get
+	// invalid via a Delete call.
 	Valid() bool
 }
 

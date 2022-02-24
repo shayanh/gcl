@@ -1,6 +1,7 @@
 # Goals
 
-1. Simple API.
+1. Simple and clear API. Behavior and time complexity of all functions should be
+   documented clearly.
 2. User should not be able to do something wrong with the API.
 3. For any task there should be only one way to do it.
 
@@ -56,21 +57,25 @@ func Merge(it1, it2 Iter[T]) []T
 func MergeFunc(it1, it2 Iter[T], lessFn) []T
 ```
 
-## set
+## tsets
 
-Ordered Set
+[Ordered] Tree Set
 
-## ordmap
+## hsets
 
-Ordered Map
+[Unordered] Hash Set
 
-## hashmap
+## tmaps
+
+[Ordered] Tree Map
+
+## hmaps
 
 [Unordered] Hash Map
 
-## list
+## lists
 
-Package list provides a doubly linked list.
+Package lists provides a doubly linked list.
 
 ```go
 type List[T] struct
@@ -123,12 +128,31 @@ func Contains(l, T) bool
 func Clone() *List[T]
 ```
 
-## mapops
+## gomaps
 
 Extra operations for builtin Go maps.
 
-## sliceops
+```go
+
+Iter()
+
+FromIter()
+
+```
+
+## goslices
 
 Extra operations for builtin Go slices.
+
+```go
+
+Iter()
+RIter()
+
+Reverse()
+
+FromIter()
+
+```
 
 ## *internal*

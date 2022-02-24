@@ -1,4 +1,5 @@
-// Package list provides a doubly linked list.
+// Package lists provides a doubly linked list and various functions useful
+// with lists of any type.
 package lists
 
 import (
@@ -8,6 +9,7 @@ import (
 	"github.com/shayanh/gogl/internal"
 	"github.com/shayanh/gogl/iters"
 	"golang.org/x/exp/constraints"
+	"golang.org/x/exp/slices"
 )
 
 type node[T any] struct {
@@ -23,6 +25,7 @@ type List[T any] struct {
 	size int
 }
 
+// NewList creates a new linked list and returns a pointer to it.
 func NewList[T any](elems ...T) *List[T] {
 	head := &node[T]{}
 	tail := &node[T]{}
@@ -47,12 +50,13 @@ func FromIter[T any](it iters.Iterator[T]) *List[T] {
 	return l
 }
 
-// Len returns size of the given list.
+// Len returns size of the given list. This function is O(1).
 func Len[T any](l *List[T]) int {
 	return l.size
 }
 
-// Iter returns a forward iterator to the beginning.
+// Iter returns a forward iterator to the beginning. Initially, the returned
+// iterator is located at one step before the first element (one-before-first).
 func Iter[T any](l *List[T]) Iterator[T] {
 	return &FrwIter[T]{
 		node: l.head,
@@ -60,7 +64,9 @@ func Iter[T any](l *List[T]) Iterator[T] {
 	}
 }
 
-// RIter returns a reverse iterator to the beginning (in the reverse order).
+// RIter returns a reverse iterator going from the end to the beginning.
+// Initially, the returned iterator is located at one step past the last
+// element (one-past-last).
 func RIter[T any](l *List[T]) Iterator[T] {
 	return &RevIter[T]{
 		node: l.tail,
@@ -68,6 +74,9 @@ func RIter[T any](l *List[T]) Iterator[T] {
 	}
 }
 
+// Equal tests whether two lists are equal: the same length and all elements
+// equal. Floating point NaNs are not considered equal.
+// This function is O(min(len(l1), len(l2))).
 func Equal[T comparable](l1, l2 *List[T]) bool {
 	if l1.size != l2.size {
 		return false
@@ -83,7 +92,11 @@ func Equal[T comparable](l1, l2 *List[T]) bool {
 	return true
 }
 
-func EqualFunc[T any](l1, l2 *List[T], eq gogl.EqualFn[T]) bool {
+// EqualFunc tests whether two lists are equal using the given `eq` function.
+// For each pair of elements, `eq` determines if they are equal or not.
+// This function is O(f * min(len(l1), len(l2))), where f is the time complexity
+// of `eq` function.
+func EqualFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], eq gogl.EqualFn[T1, T2]) bool {
 	if l1.size != l2.size {
 		return false
 	}
@@ -99,6 +112,14 @@ func EqualFunc[T any](l1, l2 *List[T], eq gogl.EqualFn[T]) bool {
 }
 
 // Compare compares the elements of l1 and l2.
+// The elements are compared sequentially from the beginning, until one element
+// is not equal to the corresponding one.
+// The result of comparing the first non-matching elements is returned. If
+// both lists are equal until one of them ends, the shorter list is considered
+// less than the longer one.
+// The result is 0 if l1 == l2, -1 if l1 < l2, and +1 if l1 > l2.
+// Comparisons involving floating point NaNs are ignored.
+// This function is O(min(len(l1), len(l2))).
 func Compare[T constraints.Ordered](l1, l2 *List[T]) int {
 	it1, it2 := Iter(l1), Iter(l2)
 	for it1.HasNext() {
@@ -119,6 +140,10 @@ func Compare[T constraints.Ordered](l1, l2 *List[T]) int {
 	return 0
 }
 
+// CompareFunc operates the same as Compare function but it uses the given
+// `cmp` function for comparing each pair of elements.
+// This function is O(f * min(len(l1), len(l2))), where f is the time complexity
+// of `cmp` function.
 func CompareFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], cmp gogl.CompareFn[T1, T2]) int {
 	it1, it2 := Iter(l1), Iter(l2)
 	for it1.HasNext() {
@@ -137,19 +162,29 @@ func CompareFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], cmp gogl.CompareFn[
 
 }
 
+// PushBack appends the given elements to the back of list `l`.
+// This function is O(len(elems)). So for a single element it would be O(1).
 func PushBack[T any](l *List[T], elems ...T) {
 	Insert(RIter(l), elems...)
 }
 
+// PushFront appends the given elements to the beginning of list `l`.
+// This function is O(len(elems)). So for a single element it would be O(1).
 func PushFront[T any](l *List[T], elems ...T) {
 	Insert(Iter(l), elems...)
 }
 
+// PopBack deletes the last element in the list. It requires the list to be
+// non-empty, otherwise it panics.
+// This function is O(1).
 func PopBack[T any](l *List[T]) {
 	require(l.size > 0, "list cannot be empty")
 	_ = Delete(RIter(l))
 }
 
+// PopFront deletes the last element in the list. It requires the list to be
+// non-empty, otherwise it panics.
+// This function is O(1).
 func PopFront[T any](l *List[T]) {
 	require(l.size > 0, "list cannot be empty")
 	_ = Delete(Iter(l))
@@ -157,7 +192,7 @@ func PopFront[T any](l *List[T]) {
 
 // Front returns the first element in the list. It panics if the given list is
 // empty.
-// This function runs is O(1).
+// This function is O(1).
 func Front[T any](l *List[T]) T {
 	require(l.size > 0, "list cannot be empty")
 	return l.head.next.value
@@ -171,6 +206,8 @@ func Back[T any](l *List[T]) T {
 	return l.tail.prev.value
 }
 
+// Reverse reverses the elements of the given list.
+// This function is O(n), where n is length of the list.
 func Reverse[T any](l *List[T]) {
 	internal.Reverse[T](Iter(l), RIter(l), l.size)
 }
@@ -185,24 +222,22 @@ func (l *List[T]) insertBetween(node, prev, next *node[T]) {
 	l.size += 1
 }
 
-// Insert inserts given values just after the given iterator.
-// This function is O(len(elems)). So inserting a single element would
-// be O(1).
+// Insert inserts the given values next after the given iterator. Direction of
+// the next is determined by the given iterator type. Insert panics if the given
+// iterator is invalid.
+// This function is O(len(elems)). So inserting a single element would be O(1).
 func Insert[T any](it Iterator[T], elems ...T) {
+	require(it.Valid(), "iterator must be valid")
 	switch typedIt := it.(type) {
 	case *FrwIter[T]:
-		require(typedIt.Valid(), "iterator must be valid")
 		require(typedIt.node.next != nil, "bad iterator")
-
 		for i := len(elems) - 1; i >= 0; i-- {
 			elem := elems[i]
 			node := &node[T]{value: elem}
 			typedIt.lst.insertBetween(node, typedIt.node, typedIt.node.next)
 		}
 	case *RevIter[T]:
-		require(typedIt.Valid(), "iterator must be valid")
 		require(typedIt.node.prev != nil, "bad iterator")
-
 		for _, elem := range elems {
 			node := &node[T]{value: elem}
 			typedIt.lst.insertBetween(node, typedIt.node.prev, typedIt.node)
@@ -226,28 +261,30 @@ func (l *List[T]) deleteNode(node *node[T]) (*node[T], *node[T]) {
 	return prev, next
 }
 
-// Delete deletes the element that the given iterator `it` is pointing to.
-// The given iterator be invalidated and cannot be used anymore. Instead you
-// should use the returned iterator. The returned iterator points to the `it`'s
-// previous element and its next element would be `it.Next()`.
+// Delete deletes the element that the given iterator `it` is pointing to it. The
+// iterator `it` will be invalidated and cannot be used anymore. You should use
+// the returned iterator instead. The returned iterator points to `it`'s
+// previous element and its next element is `it.Next()`.
+// Delete requires `it` to points to an actual element in the list. For example,
+// it doesn't accept Iter and RIter iterators (in their inital state) because
+// these iterators point to one-before-first and one-past-last respectively and
+// these are not actual list elements. Also, the given iterator must be valid.
+// Delete panics if `it` doesn't have the above requirements.
 // This function is O(1).
 func Delete[T any](it Iterator[T]) Iterator[T] {
+	require(it.Valid(), "iterator must be valid")
 	switch typedIt := it.(type) {
 	case *FrwIter[T]:
-		require(typedIt.Valid(), "iterator must be valid")
 		require(typedIt.node.prev != nil && typedIt.node.next != nil,
 			"bad iterator")
-
 		prev, _ := typedIt.lst.deleteNode(typedIt.node)
 		return &FrwIter[T]{
 			node: prev,
 			lst:  typedIt.lst,
 		}
 	case *RevIter[T]:
-		require(typedIt.Valid(), "iterator must be valid")
 		require(typedIt.node.prev != nil && typedIt.node.next != nil,
 			"bad iterator")
-
 		_, next := typedIt.lst.deleteNode(typedIt.node)
 		return &RevIter[T]{
 			node: next,
@@ -266,11 +303,11 @@ func toSlice[T any](l *List[T]) []T {
 	return res
 }
 
+// Sort sorts a list of any ordered type in ascending order.
+// This function is O(n * log(n)), where n is length of the list.
 func Sort[T constraints.Ordered](l *List[T]) {
 	slice := toSlice(l)
-	sort.Slice(slice, func(i, j int) bool {
-		return slice[i] < slice[j]
-	})
+	slices.Sort(slice)
 	it := Iter(l)
 	for _, v := range slice {
 		it.Next()
@@ -278,6 +315,10 @@ func Sort[T constraints.Ordered](l *List[T]) {
 	}
 }
 
+// SortFunc sorts the given list in ascending order as determined by the `less`
+// function.
+// This function is O(f * n * log(n)), where n is length of the list and
+// f is time complexity of the `less` function.
 func SortFunc[T any](l *List[T], less gogl.LessFn[T]) {
 	slice := toSlice(l)
 	sort.Slice(slice, func(i, j int) bool {
@@ -290,6 +331,8 @@ func SortFunc[T any](l *List[T], less gogl.LessFn[T]) {
 	}
 }
 
+// IsSorted tests whether a list of any ordered type is sorted in ascending order.
+// This function is O(n), where n is length of the list.
 func IsSorted[T constraints.Ordered](l *List[T]) bool {
 	it := RIter(l)
 	if !it.HasNext() {
@@ -306,6 +349,10 @@ func IsSorted[T constraints.Ordered](l *List[T]) bool {
 	return true
 }
 
+// IsSortedFunc tests whether a list type is sorted in ascending order, according
+// to the `less` comparison function.
+// This function is O(f * n), where n is length of the list and f is time
+// complexity of the `less` function.
 func IsSortedFunc[T any](l *List[T], less gogl.LessFn[T]) bool {
 	it := RIter(l)
 	if !it.HasNext() {
@@ -326,10 +373,13 @@ func Compact[T comparable](l *List[T]) {
 	panic("impelement me")
 }
 
-func CompactFunc[T any](l *List[T], eq gogl.EqualFn[T]) {
+func CompactFunc[T any](l *List[T], eq gogl.EqualFn[T, T]) {
 	panic("implement me")
 }
 
+// Index returns the index of the first occurrence of v in l, or -1 if not
+// present.
+// This function is O(n), where n is length of the list.
 func Index[T comparable](l *List[T], v T) int {
 	i := 0
 	it := Iter(l)
@@ -342,11 +392,16 @@ func Index[T comparable](l *List[T], v T) int {
 	return -1
 }
 
-func IndexFunc[T comparable](l *List[T], v T, eq gogl.EqualFn[T]) int {
+// IndexFunc returns the index of the first element satisfying pred,
+// or -1 if none do.
+// This function is O(f * n), where n is length of the list and f is time
+// complexity of the `pred` function.
+func IndexFunc[T comparable](l *List[T], pred func(T) bool) int {
 	i := 0
 	it := Iter(l)
 	for it.HasNext() {
-		if eq(it.Next(), v) {
+		v := it.Next()
+		if pred(v) {
 			return i
 		}
 		i++
@@ -354,6 +409,9 @@ func IndexFunc[T comparable](l *List[T], v T, eq gogl.EqualFn[T]) int {
 	return -1
 }
 
+// Pos returns an iterator pointing to the first occurrence of v in l.
+// The returned boolean value indicates if v is present in the list.
+// This function is O(n), where n is length of the list.
 func Pos[T comparable](l *List[T], v T) (Iterator[T], bool) {
 	it := Iter(l)
 	for it.HasNext() {
@@ -364,21 +422,16 @@ func Pos[T comparable](l *List[T], v T) (Iterator[T], bool) {
 	return it, false
 }
 
-func PosFunc[T any](l *List[T], v T, eq gogl.EqualFn[T]) (Iterator[T], bool) {
-	it := Iter(l)
-	for it.HasNext() {
-		if eq(it.Next(), v) {
-			return it, true
-		}
-	}
-	return it, false
-}
-
+// Contains tests whether the given list l has value v.
+// This function is O(n), where n is length of the list.
 func Contains[T comparable](l *List[T], v T) bool {
 	_, res := Pos(l, v)
 	return res
 }
 
+// Clone returns a copy of the given list. The elements are copied using
+// assignment, so this is a shallow clone.
+// This function is O(n), where n is length of the list.
 func Clone[T any](l *List[T]) *List[T] {
 	res := NewList[T]()
 	it := Iter(l)
