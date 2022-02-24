@@ -80,7 +80,7 @@ Package lists provides a doubly linked list.
 ```go
 type List[T] struct
 
-func NewList[T](elems ...T) *List[T]
+func New[T](elems ...T) *List[T]
 
 func FromIter(iters.Iter[T]) *List[T]
 
@@ -152,6 +152,12 @@ RIter()
 Reverse()
 
 FromIter()
+
+PopFront()
+PopBack()
+
+Front()
+Back()
 
 ```
 

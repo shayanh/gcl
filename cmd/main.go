@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"encoding/json"
 
 	"github.com/shayanh/gogl/iters"
 	"github.com/shayanh/gogl/lists"
@@ -16,7 +17,7 @@ func printList[T any](lst *lists.List[T]) {
 }
 
 func main() {
-	lst := lists.NewList[int](1, 2, 7)
+	lst := lists.New[int](1, 2, 7)
 	lists.PushFront(lst, -9)
 	printList(lst)
 
@@ -48,4 +49,19 @@ func main() {
 
 	lists.Sort(lst)
 	printList(lst)
+
+	fmt.Println(lst)
+
+	a, err := json.Marshal(lst)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(a))
+
+	var lst3 *lists.List[int]
+	err = json.Unmarshal(a, &lst3)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(lst3)
 }

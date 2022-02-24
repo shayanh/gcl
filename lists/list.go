@@ -3,7 +3,10 @@
 package lists
 
 import (
+	"fmt"
 	"sort"
+	"strings"
+	"encoding/json"
 
 	"github.com/shayanh/gogl"
 	"github.com/shayanh/gogl/internal"
@@ -25,8 +28,8 @@ type List[T any] struct {
 	size int
 }
 
-// NewList creates a new linked list and returns a pointer to it.
-func NewList[T any](elems ...T) *List[T] {
+// New creates a new linked list and returns a pointer to it.
+func New[T any](elems ...T) *List[T] {
 	head := &node[T]{}
 	tail := &node[T]{}
 
@@ -43,11 +46,39 @@ func NewList[T any](elems ...T) *List[T] {
 
 // FromIter builds a new list from the given iterator.
 func FromIter[T any](it iters.Iterator[T]) *List[T] {
-	l := NewList[T]()
+	l := New[T]()
 	for it.HasNext() {
 		PushBack(l, it.Next())
 	}
 	return l
+}
+
+func (l *List[T]) String() string {
+	var b strings.Builder
+	b.WriteString("lists.List[")
+	it := Iter(l)
+	for it.HasNext() {
+		v := it.Next()
+		fmt.Fprintf(&b, "%v", v)
+		if it.HasNext() {
+			b.WriteString(" ")
+		}
+	}
+	b.WriteString("]")
+	return b.String()
+}
+
+func (l *List[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(toSlice(l))
+}
+
+func (l *List[T]) UnmarshalJSON(b []byte) error {
+	var slice []T
+	if err := json.Unmarshal(b, &slice); err != nil {
+		return err
+	}
+	*l = *New(slice...)
+	return nil
 }
 
 // Len returns size of the given list. This function is O(1).
@@ -369,12 +400,60 @@ func IsSortedFunc[T any](l *List[T], less gogl.LessFn[T]) bool {
 	return true
 }
 
+// Compact replaces every consecutive group of equal elements with a single
+// copy. This is like the uniq Unix command.
+// This function is O(n), where n is length of the list.
 func Compact[T comparable](l *List[T]) {
-	panic("impelement me")
+	it1 := Iter(l).(*FrwIter[T])
+	if !it1.HasNext() {
+		return
+	}
+	last := it1.Next()
+	if !it1.HasNext() {
+		return
+	}
+	it1.Next()
+
+	it2 := Iter(l)
+	it2.Next()
+	for it2.HasNext() {
+		v := it2.Next()
+		if v != last {
+			it1.Set(v)
+			it1.Next()
+			last = v
+		}
+	}
+	it1.lst.tail.prev = it1.node.prev
+	it1.node.prev.next = it1.lst.tail
 }
 
+// CompactFunc is like Compact but it uses the `eq` function for comparison.
+// This function is O(f * n), where n is length of the list and f is time
+// complexity of the `eq` function.
 func CompactFunc[T any](l *List[T], eq gogl.EqualFn[T, T]) {
-	panic("implement me")
+	it1 := Iter(l).(*FrwIter[T])
+	if !it1.HasNext() {
+		return
+	}
+	last := it1.Next()
+	if !it1.HasNext() {
+		return
+	}
+	it1.Next()
+
+	it2 := Iter(l)
+	it2.Next()
+	for it2.HasNext() {
+		v := it2.Next()
+		if !eq(v, last) {
+			it1.Set(v)
+			it1.Next()
+			last = v
+		}
+	}
+	it1.lst.tail.prev = it1.node.prev
+	it1.node.prev.next = it1.lst.tail
 }
 
 // Index returns the index of the first occurrence of v in l, or -1 if not
@@ -433,7 +512,7 @@ func Contains[T comparable](l *List[T], v T) bool {
 // assignment, so this is a shallow clone.
 // This function is O(n), where n is length of the list.
 func Clone[T any](l *List[T]) *List[T] {
-	res := NewList[T]()
+	res := New[T]()
 	it := Iter(l)
 	for it.HasNext() {
 		PushBack(res, it.Next())
