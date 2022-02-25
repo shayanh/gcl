@@ -1,5 +1,10 @@
 package goslices
 
+import (
+	"github.com/shayanh/gogl/internal"
+	"github.com/shayanh/gogl/iters"
+)
+
 func Iter[S ~[]T, T any](s S) Iterator[T] {
 	return &FrwIter[T]{
 		slice: s,
@@ -18,9 +23,9 @@ func FromIter[T any](it iters.Iterator[T]) (res []T) {
 	for it.HasNext() {
 		res = append(res, it.Next())
 	}
-	return 
+	return
 }
 
 func Reverse[S ~[]T, T any](s S) {
-	internal.Reverse(Iter(s), RIter(s))
+	internal.Reverse[T](Iter(s), RIter(s), len(s))
 }

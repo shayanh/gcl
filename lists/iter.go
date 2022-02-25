@@ -66,7 +66,7 @@ func (it *RevIter[T]) Next() T {
 	require(it.Valid(), "iterator must be valid")
 	require(it.HasNext(), "iterator must have next")
 
-	it.node = it.node.next
+	it.node = it.node.prev
 	return it.node.value
 }
 

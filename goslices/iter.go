@@ -11,34 +11,33 @@ type FrwIter[T any] struct {
 	index int
 }
 
-func (it *FrwIter) HasNext() bool {
-	return it.index + 1 < len(it.slice)
+func (it *FrwIter[T]) HasNext() bool {
+	return it.index+1 < len(it.slice)
 }
 
-func (it *FrwIter) Next() T {
+func (it *FrwIter[T]) Next() T {
 	it.index += 1
-	return it.slice[index]
+	return it.slice[it.index]
 }
 
-func (it *FrwIter) Set(val T) {
+func (it *FrwIter[T]) Set(val T) {
 	it.slice[it.index] = val
 }
 
 type RevIter[T any] struct {
-	HasNext() bool
-	Next() T
-	Set(T)
+	slice []T
+	index int
 }
 
-func (it *RevIter) HasNext() bool {
+func (it *RevIter[T]) HasNext() bool {
 	return it.index > 0
 }
 
-func (it *RevIter) Next() T {
+func (it *RevIter[T]) Next() T {
 	it.index -= 1
-	return it.slice[index]
+	return it.slice[it.index]
 }
 
-func (it *RevIter) Set(val T) {
+func (it *RevIter[T]) Set(val T) {
 	it.slice[it.index] = val
 }

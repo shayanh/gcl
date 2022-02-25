@@ -3,10 +3,10 @@
 package lists
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
-	"encoding/json"
 
 	"github.com/shayanh/gogl"
 	"github.com/shayanh/gogl/internal"
@@ -409,6 +409,7 @@ func Compact[T comparable](l *List[T]) {
 		return
 	}
 	last := it1.Next()
+	newSize := 1
 	if !it1.HasNext() {
 		return
 	}
@@ -420,12 +421,17 @@ func Compact[T comparable](l *List[T]) {
 		v := it2.Next()
 		if v != last {
 			it1.Set(v)
-			it1.Next()
+			if it1.HasNext() {
+				it1.Next()
+			}
 			last = v
+			newSize += 1
 		}
 	}
 	it1.lst.tail.prev = it1.node.prev
 	it1.node.prev.next = it1.lst.tail
+
+	it1.lst.size = newSize
 }
 
 // CompactFunc is like Compact but it uses the `eq` function for comparison.
@@ -437,6 +443,7 @@ func CompactFunc[T any](l *List[T], eq gogl.EqualFn[T, T]) {
 		return
 	}
 	last := it1.Next()
+	newSize := 1
 	if !it1.HasNext() {
 		return
 	}
@@ -448,12 +455,18 @@ func CompactFunc[T any](l *List[T], eq gogl.EqualFn[T, T]) {
 		v := it2.Next()
 		if !eq(v, last) {
 			it1.Set(v)
-			it1.Next()
+			if it1.HasNext() {
+				it1.Next()
+			}
 			last = v
+			newSize += 1
 		}
 	}
 	it1.lst.tail.prev = it1.node.prev
 	it1.node.prev.next = it1.lst.tail
+
+	it1.lst.size = newSize
+
 }
 
 // Index returns the index of the first occurrence of v in l, or -1 if not
