@@ -15,6 +15,11 @@ API to the standard Go library.
 as strict as Rust and we will allow some extra operations on collections that
 Rust doesn’t.
 
+# Todo
+
+1. Unit tests
+2. Benchmarks
+
 # Packages
 
 ## iters
@@ -57,17 +62,17 @@ func Merge(it1, it2 Iter[T]) []T
 func MergeFunc(it1, it2 Iter[T], lessFn) []T
 ```
 
-## tsets
+<!--## tsets-->
 
-[Ordered] Tree Set
+<!--[Ordered] Tree Set-->
 
 ## hsets
 
 [Unordered] Hash Set
 
-## tmaps
+<!--## tmaps-->
 
-[Ordered] Tree Map
+<!--[Ordered] Tree Map-->
 
 ## hmaps
 
