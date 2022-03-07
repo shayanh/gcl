@@ -20,3 +20,12 @@ type MutIterator[T any] interface {
 	// Set replaces the last value returned by Next() with the given value.
 	Set(T)
 }
+
+// Advance advances an iterator n steps. Advance stops at any point
+// where the given iterator doesn't have next element.
+func Advance[T any](it Iterator[T], n uint) {
+	var i uint
+	for i = 0; i < n && it.HasNext(); i++ {
+		it.Next()
+	}
+}

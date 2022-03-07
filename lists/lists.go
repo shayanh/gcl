@@ -5,7 +5,6 @@ package lists
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/shayanh/gogl"
@@ -107,7 +106,7 @@ func RIter[T any](l *List[T]) Iterator[T] {
 
 // Equal tests whether two lists are equal: the same length and all elements
 // equal. Floating point NaNs are not considered equal.
-// This function is O(min(len(l1), len(l2))).
+// This function is O(min(Len(l1), Len(l2))).
 func Equal[T comparable](l1, l2 *List[T]) bool {
 	if l1.size != l2.size {
 		return false
@@ -125,7 +124,7 @@ func Equal[T comparable](l1, l2 *List[T]) bool {
 
 // EqualFunc tests whether two lists are equal using the given `eq` function.
 // For each pair of elements, `eq` determines if they are equal or not.
-// This function is O(f * min(len(l1), len(l2))), where f is the time complexity
+// This function is O(f * min(Len(l1), Len(l2))), where f is the time complexity
 // of `eq` function.
 func EqualFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], eq gogl.EqualFn[T1, T2]) bool {
 	if l1.size != l2.size {
@@ -150,7 +149,7 @@ func EqualFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], eq gogl.EqualFn[T1, T
 // less than the longer one.
 // The result is 0 if l1 == l2, -1 if l1 < l2, and +1 if l1 > l2.
 // Comparisons involving floating point NaNs are ignored.
-// This function is O(min(len(l1), len(l2))).
+// This function is O(min(Len(l1), Len(l2))).
 func Compare[T constraints.Ordered](l1, l2 *List[T]) int {
 	it1, it2 := Iter(l1), Iter(l2)
 	for it1.HasNext() {
@@ -173,7 +172,9 @@ func Compare[T constraints.Ordered](l1, l2 *List[T]) int {
 
 // CompareFunc operates the same as Compare function but it uses the given
 // `cmp` function for comparing each pair of elements.
-// This function is O(f * min(len(l1), len(l2))), where f is the time complexity
+// The result is the first non-zero result of cmp; if cmp always
+// returns 0 the result is 0 if Len(l1) == Len(l2), -1 if Len(l1) < Len(l2),
+// This function is O(f * min(Len(l1), Len(l2))), where f is the time complexity
 // of `cmp` function.
 func CompareFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], cmp gogl.CompareFn[T1, T2]) int {
 	it1, it2 := Iter(l1), Iter(l2)
@@ -194,13 +195,13 @@ func CompareFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], cmp gogl.CompareFn[
 }
 
 // PushBack appends the given elements to the back of list `l`.
-// This function is O(len(elems)). So for a single element it would be O(1).
+// This function is O(Len(elems)). So for a single element it would be O(1).
 func PushBack[T any](l *List[T], elems ...T) {
 	Insert(RIter(l), elems...)
 }
 
 // PushFront appends the given elements to the beginning of list `l`.
-// This function is O(len(elems)). So for a single element it would be O(1).
+// This function is O(Len(elems)). So for a single element it would be O(1).
 func PushFront[T any](l *List[T], elems ...T) {
 	Insert(Iter(l), elems...)
 }
@@ -256,7 +257,7 @@ func (l *List[T]) insertBetween(node, prev, next *node[T]) {
 // Insert inserts the given values next after the given iterator. Direction of
 // the next is determined by the given iterator type. Insert panics if the given
 // iterator is invalid.
-// This function is O(len(elems)). So inserting a single element would be O(1).
+// This function is O(Len(elems)). So inserting a single element would be O(1).
 func Insert[T any](it Iterator[T], elems ...T) {
 	require(it.Valid(), "iterator must be valid")
 	switch typedIt := it.(type) {
@@ -352,9 +353,7 @@ func Sort[T constraints.Ordered](l *List[T]) {
 // f is time complexity of the `less` function.
 func SortFunc[T any](l *List[T], less gogl.LessFn[T]) {
 	slice := toSlice(l)
-	sort.Slice(slice, func(i, j int) bool {
-		return less(slice[i], slice[j])
-	})
+	slices.SortFunc(slice, less)
 	it := Iter(l)
 	for _, v := range slice {
 		it.Next()
