@@ -1,4 +1,4 @@
-package gogl
+package gcl
 
 import "golang.org/x/exp/constraints"
 

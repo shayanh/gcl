@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/shayanh/gogl/iters"
+	"github.com/shayanh/gcl/iters"
 )
 
 func Reverse[T any](fIt iters.MutIterator[T], rIt iters.MutIterator[T], length int) {

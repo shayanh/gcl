@@ -1,4 +1,4 @@
-module github.com/shayanh/gogl
+module github.com/shayanh/gcl
 
 go 1.18
 

@@ -3,7 +3,7 @@ package iters
 import (
 	"golang.org/x/exp/constraints"
 
-	"github.com/shayanh/gogl"
+	"github.com/shayanh/gcl"
 )
 
 // ForEach calls a function on each element of an iterator. ForEach moves the
@@ -161,7 +161,7 @@ func Max[T constraints.Ordered](it Iterator[T]) (max T) {
 // `less` function for comparison.
 // MaxFunc moves the given iterator `it` to its end such that after a MaxFunc
 // call `it.HasNext()` will be false.
-func MaxFunc[T any](it Iterator[T], less gogl.LessFn[T]) (max T) {
+func MaxFunc[T any](it Iterator[T], less gcl.LessFn[T]) (max T) {
 	if !it.HasNext() {
 		return
 	}
@@ -196,7 +196,7 @@ func Min[T constraints.Ordered](it Iterator[T]) (min T) {
 // `less` function for comparison.
 // MinFunc moves the given iterator `it` to its end such that after a MinFunc
 // call `it.HasNext()` will be false.
-func MinFunc[T constraints.Ordered](it Iterator[T], less gogl.LessFn[T]) (min T) {
+func MinFunc[T constraints.Ordered](it Iterator[T], less gcl.LessFn[T]) (min T) {
 	if !it.HasNext() {
 		return
 	}
@@ -213,7 +213,7 @@ func MinFunc[T constraints.Ordered](it Iterator[T], less gogl.LessFn[T]) (min T)
 // Sum returns sum of the elements in an iterator of any numeric type.
 // Sum moves the given iterator `it` to its end such that after a Sum
 // call `it.HasNext()` will be false.
-func Sum[T gogl.Number](it Iterator[T]) (sum T) {
+func Sum[T gcl.Number](it Iterator[T]) (sum T) {
 	sum = 0
 	for it.HasNext() {
 		sum += it.Next()

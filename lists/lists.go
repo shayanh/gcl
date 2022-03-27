@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/shayanh/gogl"
-	"github.com/shayanh/gogl/internal"
-	"github.com/shayanh/gogl/iters"
+	"github.com/shayanh/gcl"
+	"github.com/shayanh/gcl/internal"
+	"github.com/shayanh/gcl/iters"
 	"golang.org/x/exp/constraints"
 	"golang.org/x/exp/slices"
 )
@@ -126,7 +126,7 @@ func Equal[T comparable](l1, l2 *List[T]) bool {
 // For each pair of elements, `eq` determines if they are equal or not.
 // This function is O(f * min(Len(l1), Len(l2))), where f is the time complexity
 // of `eq` function.
-func EqualFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], eq gogl.EqualFn[T1, T2]) bool {
+func EqualFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], eq gcl.EqualFn[T1, T2]) bool {
 	if l1.size != l2.size {
 		return false
 	}
@@ -176,7 +176,7 @@ func Compare[T constraints.Ordered](l1, l2 *List[T]) int {
 // returns 0 the result is 0 if Len(l1) == Len(l2), -1 if Len(l1) < Len(l2),
 // This function is O(f * min(Len(l1), Len(l2))), where f is the time complexity
 // of `cmp` function.
-func CompareFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], cmp gogl.CompareFn[T1, T2]) int {
+func CompareFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], cmp gcl.CompareFn[T1, T2]) int {
 	it1, it2 := Iter(l1), Iter(l2)
 	for it1.HasNext() {
 		if !it2.HasNext() {
@@ -351,7 +351,7 @@ func Sort[T constraints.Ordered](l *List[T]) {
 // function.
 // This function is O(f * n * log(n)), where n is length of the list and
 // f is time complexity of the `less` function.
-func SortFunc[T any](l *List[T], less gogl.LessFn[T]) {
+func SortFunc[T any](l *List[T], less gcl.LessFn[T]) {
 	slice := toSlice(l)
 	slices.SortFunc(slice, less)
 	it := Iter(l)
@@ -383,7 +383,7 @@ func IsSorted[T constraints.Ordered](l *List[T]) bool {
 // to the `less` comparison function.
 // This function is O(f * n), where n is length of the list and f is time
 // complexity of the `less` function.
-func IsSortedFunc[T any](l *List[T], less gogl.LessFn[T]) bool {
+func IsSortedFunc[T any](l *List[T], less gcl.LessFn[T]) bool {
 	it := RIter(l)
 	if !it.HasNext() {
 		return true
@@ -436,7 +436,7 @@ func Compact[T comparable](l *List[T]) {
 // CompactFunc is like Compact but it uses the `eq` function for comparison.
 // This function is O(f * n), where n is length of the list and f is time
 // complexity of the `eq` function.
-func CompactFunc[T any](l *List[T], eq gogl.EqualFn[T, T]) {
+func CompactFunc[T any](l *List[T], eq gcl.EqualFn[T, T]) {
 	it1 := Iter(l).(*FrwIter[T])
 	if !it1.HasNext() {
 		return

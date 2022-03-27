@@ -1,8 +1,8 @@
 package goslices
 
 import (
-	"github.com/shayanh/gogl/internal"
-	"github.com/shayanh/gogl/iters"
+	"github.com/shayanh/gcl/internal"
+	"github.com/shayanh/gcl/iters"
 )
 
 func Iter[S ~[]T, T any](s S) Iterator[T] {

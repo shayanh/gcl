@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/shayanh/gogl"
-	"github.com/shayanh/gogl/iters"
+	"github.com/shayanh/gcl"
+	"github.com/shayanh/gcl/iters"
 )
 
 var equalTests = []struct {
@@ -44,8 +44,8 @@ func TestEqual(t *testing.T) {
 
 func TestEqualFunc(t *testing.T) {
 	for _, test := range equalTests {
-		if res := EqualFunc(test.l1, test.l2, gogl.Equal[int]); res != test.want {
-			t.Errorf("EqualFunc(%v, %v, gogl.Equal[int]) = %v, want = %v", test.l1, test.l2, res, test.want)
+		if res := EqualFunc(test.l1, test.l2, gcl.Equal[int]); res != test.want {
+			t.Errorf("EqualFunc(%v, %v, gcl.Equal[int]) = %v, want = %v", test.l1, test.l2, res, test.want)
 		}
 	}
 
@@ -103,8 +103,8 @@ func TestCompare(t *testing.T) {
 
 func TestCompareFunc(t *testing.T) {
 	for _, test := range equalTests {
-		if res := CompareFunc(test.l1, test.l2, gogl.Compare[int]); (res == 0) != test.want {
-			t.Errorf("CompareFunc(%v, %v, gogl.Compare[int]) = %v, want = %v", test.l1, test.l2, res, func(want bool) string {
+		if res := CompareFunc(test.l1, test.l2, gcl.Compare[int]); (res == 0) != test.want {
+			t.Errorf("CompareFunc(%v, %v, gcl.Compare[int]) = %v, want = %v", test.l1, test.l2, res, func(want bool) string {
 				if want {
 					return "0"
 				}
@@ -114,8 +114,8 @@ func TestCompareFunc(t *testing.T) {
 	}
 
 	for _, test := range compareTests {
-		if res := CompareFunc(test.l1, test.l2, gogl.Compare[int]); res != test.want {
-			t.Errorf("CompareFunc(%v, %v, gogl.Compare[int]) = %v, want = %v", test.l1, test.l2, res, test.want)
+		if res := CompareFunc(test.l1, test.l2, gcl.Compare[int]); res != test.want {
+			t.Errorf("CompareFunc(%v, %v, gcl.Compare[int]) = %v, want = %v", test.l1, test.l2, res, test.want)
 		}
 	}
 }
@@ -283,13 +283,13 @@ func TestSort(t *testing.T) {
 
 func TestSortFunc(t *testing.T) {
 	cloned := Clone(sortInts)
-	if SortFunc(cloned, gogl.Less[int]); !IsSortedFunc(cloned, gogl.Less[int]) {
-		t.Errorf("SortFunc(%v, gogl.Less[int]) got %v", sortInts, cloned)
+	if SortFunc(cloned, gcl.Less[int]); !IsSortedFunc(cloned, gogl.Less[int]) {
+		t.Errorf("SortFunc(%v, gcl.Less[int]) got %v", sortInts, cloned)
 	}
 
 	cloned = Clone(sortInts)
-	if SortFunc(cloned, gogl.Greater[int]); !IsSortedFunc(cloned, gogl.Greater[int]) {
-		t.Errorf("SortFunc(%v, gogl.Greater[int]) got %v", sortInts, cloned)
+	if SortFunc(cloned, gcl.Greater[int]); !IsSortedFunc(cloned, gogl.Greater[int]) {
+		t.Errorf("SortFunc(%v, gcl.Greater[int]) got %v", sortInts, cloned)
 	}
 }
 
@@ -358,8 +358,8 @@ func TestCompact(t *testing.T) {
 func TestCompactFunc(t *testing.T) {
 	for _, test := range compactTests {
 		cloned := Clone(test.l)
-		if CompactFunc(cloned, gogl.Equal[int]); !Equal(cloned, test.want) {
-			t.Errorf("CompactFunc(%v, gogl.Equal[int]) got %v, want %v", test.l, cloned, test.want)
+		if CompactFunc(cloned, gcl.Equal[int]); !Equal(cloned, test.want) {
+			t.Errorf("CompactFunc(%v, gcl.Equal[int]) got %v, want %v", test.l, cloned, test.want)
 		}
 	}
 }

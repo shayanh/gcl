@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/shayanh/gogl/iters"
-	"github.com/shayanh/gogl/lists"
+	"github.com/shayanh/gcl/iters"
+	"github.com/shayanh/gcl/lists"
 )
 
 func printList[T any](lst *lists.List[T]) {
