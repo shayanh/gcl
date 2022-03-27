@@ -283,12 +283,12 @@ func TestSort(t *testing.T) {
 
 func TestSortFunc(t *testing.T) {
 	cloned := Clone(sortInts)
-	if SortFunc(cloned, gcl.Less[int]); !IsSortedFunc(cloned, gogl.Less[int]) {
+	if SortFunc(cloned, gcl.Less[int]); !IsSortedFunc(cloned, gcl.Less[int]) {
 		t.Errorf("SortFunc(%v, gcl.Less[int]) got %v", sortInts, cloned)
 	}
 
 	cloned = Clone(sortInts)
-	if SortFunc(cloned, gcl.Greater[int]); !IsSortedFunc(cloned, gogl.Greater[int]) {
+	if SortFunc(cloned, gcl.Greater[int]); !IsSortedFunc(cloned, gcl.Greater[int]) {
 		t.Errorf("SortFunc(%v, gcl.Greater[int]) got %v", sortInts, cloned)
 	}
 }
