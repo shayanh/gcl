@@ -1,8 +1,8 @@
 package lists
 
 import (
-	"testing"
 	"strings"
+	"testing"
 
 	"github.com/shayanh/gogl"
 	"github.com/shayanh/gogl/iters"
@@ -10,7 +10,7 @@ import (
 
 var equalTests = []struct {
 	l1, l2 *List[int]
-	want bool
+	want   bool
 }{
 	{
 		New[int](),
@@ -18,18 +18,18 @@ var equalTests = []struct {
 		true,
 	},
 	{
-		New[int](1, 2, 3),
-		New[int](1, 2, 3),
+		New(1, 2, 3),
+		New(1, 2, 3),
 		true,
 	},
 	{
-		New[int](1, 1, 1),
-		New[int](1, 2, 1),
+		New(1, 1, 1),
+		New(1, 2, 1),
 		false,
 	},
 	{
-		New[int](1, 2, 3),
-		New[int](1, 2, 3, 4),
+		New(1, 2, 3),
+		New(1, 2, 3, 4),
 		false,
 	},
 }
@@ -121,92 +121,92 @@ func TestCompareFunc(t *testing.T) {
 }
 
 var pushBackTests = []struct {
-	l *List[int]
+	l     *List[int]
 	elems []int
-	want *List[int]
+	want  *List[int]
 }{
 	{
 		New[int](),
 		[]int{1, 2, 3},
-		New[int](1, 2, 3),
+		New(1, 2, 3),
 	},
 	{
-		New[int](3, 4, 5),
+		New(3, 4, 5),
 		[]int{6},
-		New[int](3, 4, 5, 6),
+		New(3, 4, 5, 6),
 	},
 }
 
 func TestPushBack(t *testing.T) {
 	for _, test := range pushBackTests {
 		cloned := Clone(test.l)
-		if PushBack(cloned, test.elems...);!Equal(cloned, test.want) {
+		if PushBack(cloned, test.elems...); !Equal(cloned, test.want) {
 			t.Errorf("PushBack(%v, %v) got %v, want %v", test.l, test.elems, cloned, test.want)
 		}
 	}
 }
 
 var pushFrontTests = []struct {
-	l *List[int]
+	l     *List[int]
 	elems []int
-	want *List[int]
+	want  *List[int]
 }{
 	{
 		New[int](),
 		[]int{1, 2, 3},
-		New[int](1, 2, 3),
+		New(1, 2, 3),
 	},
 	{
-		New[int](3, 4, 5),
+		New(3, 4, 5),
 		[]int{6, 7},
-		New[int](6, 7, 3, 4, 5),
+		New(6, 7, 3, 4, 5),
 	},
 }
 
 func TestPushFront(t *testing.T) {
 	for _, test := range pushFrontTests {
 		cloned := Clone(test.l)
-		if PushFront(cloned, test.elems...);!Equal(cloned, test.want) {
+		if PushFront(cloned, test.elems...); !Equal(cloned, test.want) {
 			t.Errorf("PushFront(%v, %v) got %v, want %v", test.l, test.elems, cloned, test.want)
 		}
 	}
 }
 
 var insertTests = []struct {
-	l *List[int]
-	itFn func(*List[int]) Iterator[int]
+	l     *List[int]
+	itFn  func(*List[int]) Iterator[int]
 	elems []int
-	want *List[int]
+	want  *List[int]
 }{
 	{
-		l: New[int](1, 3),
+		l: New(1, 3),
 		itFn: func(l *List[int]) Iterator[int] {
 			it := Iter(l)
 			iters.Advance[int](it, 1)
 			return it
 		},
 		elems: []int{2},
-		want: New[int](1, 2, 3),
+		want:  New(1, 2, 3),
 	},
 	{
-		l: New[int](1, 2, 5, 6),
+		l: New(1, 2, 5, 6),
 		itFn: func(l *List[int]) Iterator[int] {
 			it := Iter(l)
 			iters.Advance[int](it, 2)
 			return it
 		},
 		elems: []int{3, 4},
-		want: New[int](1, 2, 3, 4, 5, 6),
+		want:  New(1, 2, 3, 4, 5, 6),
 	},
 	{
-		l: New[int](1, 2, 5, 6),
+		l: New(1, 2, 5, 6),
 		itFn: func(l *List[int]) Iterator[int] {
 			it := RIter(l)
 			iters.Advance[int](it, 2)
 			return it
 		},
 		elems: []int{3, 4},
-		want: New[int](1, 2, 3, 4, 5, 6),
+		want:  New(1, 2, 3, 4, 5, 6),
 	},
 }
 
@@ -220,33 +220,33 @@ func TestInsert(t *testing.T) {
 }
 
 var deleteTests = []struct {
-	l *List[int]
-	itFn func(*List[int]) Iterator[int]
+	l       *List[int]
+	itFn    func(*List[int]) Iterator[int]
 	hasNext bool
-	next int
-	want *List[int]
+	next    int
+	want    *List[int]
 }{
 	{
-		l: New[int](1, 2, 7, 3),
+		l: New(1, 2, 7, 3),
 		itFn: func(l *List[int]) Iterator[int] {
 			it := Iter(l)
 			iters.Advance[int](it, 3)
 			return it
 		},
 		hasNext: true,
-		next: 3,
-		want: New[int](1, 2, 3),
+		next:    3,
+		want:    New(1, 2, 3),
 	},
 	{
-		l: New[int](1, 2, 3, 4),
+		l: New(1, 2, 3, 4),
 		itFn: func(l *List[int]) Iterator[int] {
 			it := RIter(l)
 			iters.Advance[int](it, 1)
 			return it
 		},
 		hasNext: true,
-		next: 3,
-		want: New[int](1, 2, 3),
+		next:    3,
+		want:    New(1, 2, 3),
 	},
 }
 
@@ -365,8 +365,8 @@ func TestCompactFunc(t *testing.T) {
 }
 
 var indexTests = []struct {
-	l *List[int]
-	v int
+	l    *List[int]
+	v    int
 	want int
 }{
 	{
@@ -391,21 +391,21 @@ func TestIndex(t *testing.T) {
 }
 
 var indexFuncTests = []struct {
-	l *List[int]
+	l    *List[int]
 	pred func(int) bool
 	want int
 }{
 	{
 		l: New(1, 2, 3, 4),
 		pred: func(n int) bool {
-			return n % 2 == 0
+			return n%2 == 0
 		},
 		want: 1,
 	},
 	{
 		l: New(0, 2, 6, 4),
 		pred: func(n int) bool {
-			return n % 2 == 1
+			return n%2 == 1
 		},
 		want: -1,
 	},
@@ -421,11 +421,11 @@ func TestIndexFunc(t *testing.T) {
 }
 
 var posTests = []struct {
-	l *List[int]
-	v int
-	found bool
+	l       *List[int]
+	v       int
+	found   bool
 	hasNext bool
-	next int
+	next    int
 }{
 	{
 		New(1, 2, 3, 4),
