@@ -33,7 +33,7 @@ func main() {
 	lists.Insert(lists.RIter(lst), 13, 14)
 	printList(lst)
 
-	it := iters.Map[int, int](lists.Iter(lst), func(t int) int {
+	it := iters.Map[int](lists.Iter(lst), func(t int) int {
 		return t * 2
 	})
 	lst2 := lists.FromIter(it)

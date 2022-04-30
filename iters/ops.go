@@ -15,6 +15,40 @@ func ForEach[T any](it Iterator[T], fn func(T)) {
 	}
 }
 
+// Equal determines of the elements of two iterators are equal. It returns true
+// if all elements are equal and both iterators have the same number of
+// elements. If the first iterator has l1 elements and the second iterator has
+// l2 elements, Equal advances each iterator min(l1, l2) steps.
+func Equal[T comparable](it1, it2 Iterator[T]) bool {
+	for it1.HasNext() && it2.HasNext() {
+		v1 := it1.Next()
+		v2 := it2.Next()
+		if v1 != v2 {
+			return false
+		}
+	}
+	if it1.HasNext() || it2.HasNext() {
+		return false
+	}
+	return true
+}
+
+// EqualFunc works the same as Equal, but it gives the function eq for element
+// comparison.
+func EqualFunc[T1 any, T2 any](it1 Iterator[T1], it2 Iterator[T2], eq gcl.EqualFn[T1, T2]) bool {
+	for it1.HasNext() && it2.HasNext() {
+		v1 := it1.Next()
+		v2 := it2.Next()
+		if !eq(v1, v2) {
+			return false
+		}
+	}
+	if it1.HasNext() || it2.HasNext() {
+		return false
+	}
+	return true
+}
+
 type mapIter[T any, V any] struct {
 	wrappedIt Iterator[T]
 	fn        func(T) V
@@ -28,7 +62,7 @@ func (it *mapIter[T, V]) Next() V {
 	return it.fn(it.wrappedIt.Next())
 }
 
-// Map applies the a function `fn` on elements the given iterator `it` and
+// Map applies the function `fn` on elements the given iterator `it` and
 // returns a new iterator over the mapped variables. Map moves the given
 // iterator `it` to its end such that after a Map call `it.HasNext()` will be
 // false.
@@ -41,7 +75,7 @@ func Map[T any, V any](it Iterator[T], fn func(T) V) Iterator[V] {
 // Reduce applies a function of two arguments cumulatively to the items of
 // the given iterator from the beginning to the end.
 // Reduce moves the given iterator `it` to its end such that after a Reduce
-// call `it.HasNext()` will be false.
+// call, `it.HasNext()` will be false.
 func Reduce[T any](it Iterator[T], fn func(T, T) T) (acc T) {
 	if !it.HasNext() {
 		return
