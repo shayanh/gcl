@@ -33,3 +33,8 @@ func Compare[T constraints.Ordered](a, b T) int {
 type Number interface {
 	constraints.Integer | constraints.Float | constraints.Complex
 }
+
+type MapElem[K any, V any] struct {
+	Key   K
+	Value V
+}
