@@ -465,7 +465,6 @@ func CompactFunc[T any](l *List[T], eq gcl.EqualFn[T, T]) {
 	it1.node.prev.next = it1.lst.tail
 
 	it1.lst.size = newSize
-
 }
 
 // Index returns the index of the first occurrence of v in l, or -1 if not

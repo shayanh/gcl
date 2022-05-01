@@ -254,3 +254,26 @@ func Sum[T gcl.Number](it Iterator[T]) (sum T) {
 	}
 	return
 }
+
+type zipIter[T1 any, T2 any] struct {
+	it1 Iterator[T1]
+	it2 Iterator[T2]
+}
+
+func (it *zipIter[T1, T2]) HasNext() bool {
+	return it.it1.HasNext() && it.it2.HasNext()
+}
+
+func (it *zipIter[T1, T2]) Next() gcl.Zipped[T1, T2] {
+	return gcl.Zipped[T1, T2]{
+		First:  it.it1.Next(),
+		Second: it.it2.Next(),
+	}
+}
+
+func Zip[T1 any, T2 any](it1 Iterator[T1], it2 Iterator[T2]) Iterator[gcl.Zipped[T1, T2]] {
+	return &zipIter[T1, T2]{
+		it1: it1,
+		it2: it2,
+	}
+}

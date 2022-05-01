@@ -9,22 +9,23 @@
 
 We decided to provide functions in packages instead of methods, since methods
 cannot have extra generic types. Also with functions, we would have a similar
-API to the standard Go library.
+API to the standard Go library (for example `strings` and `exp/slices`).
 
 `iters` package is inspired by Rust’s iterators. However, in general we won’t be
-as strict as Rust and we will allow some extra operations on collections that
+as strict as Rust, and we will allow some extra operations on collections that
 Rust doesn’t.
 
 # Todo
 
-1. Unit tests
-2. Benchmarks
+1. Packages: `hsets`, `hmaps`, `tsets`, `tmaps`
+2. Unit tests
+3. Benchmarks
 
 # Packages
 
-## iters
+## `iters`
 
-Package iters defines the general iterator interface and provides operations on
+Package `iters` defines the general iterator interface and provides operations on
 the given iterators.
 
 ```go
@@ -54,7 +55,6 @@ func MinFunc(Iter[T], lessFn) T
 
 func Zip(it1 Iter[T], it2 Iter[V]) Iter[Zipped[T, V]]
 
-// Not sure
 func Advance(Iter[T], n int)
 
 // Not sure
@@ -62,25 +62,25 @@ func Merge(it1, it2 Iter[T]) []T
 func MergeFunc(it1, it2 Iter[T], lessFn) []T
 ```
 
-<!--## tsets-->
+## `tsets`
 
-<!--[Ordered] Tree Set-->
+(Ordered) Tree Set
 
-## hsets
+## `hsets`
 
-[Unordered] Hash Set
+(Unordered) Hash Set
 
 <!--## tmaps-->
 
 <!--[Ordered] Tree Map-->
 
-## hmaps
+## `hmaps`
 
-[Unordered] Hash Map
+(Unordered) Hash Map
 
-## lists
+## `lists`
 
-Package lists provides a doubly linked list.
+Package `lists` provides a doubly linked list.
 
 ```go
 type List[T] struct
@@ -91,7 +91,7 @@ func FromIter(iters.Iter[T]) *List[T]
 
 func Len(l) int
 
-func ّIter(l) Iter[T]
+func Iter(l) Iter[T]
 func RIter(l) Iter[T]
 
 func Equal(l1, l2 *List[T]) bool
@@ -133,24 +133,21 @@ func Contains(l, T) bool
 func Clone() *List[T]
 ```
 
-## gomaps
+## `gomaps`
 
-Extra operations for builtin Go maps.
+Extra operations for built-in Go maps.
 
 ```go
-
 Iter()
 
 FromIter()
-
 ```
 
-## goslices
+## `goslices`
 
-Extra operations for builtin Go slices.
+Extra operations for built-in Go slices.
 
 ```go
-
 Iter()
 RIter()
 
@@ -158,14 +155,13 @@ Reverse()
 
 FromIter()
 
+PushFront()
 
-// not sure
 PopFront()
 PopBack()
 
 Front()
 Back()
-
 ```
 
-## *internal*
+## *`internal`*
