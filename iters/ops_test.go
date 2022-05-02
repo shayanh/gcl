@@ -10,34 +10,34 @@ import (
 )
 
 var equalTests = []struct {
-	it1, it2 iters.Iterator[int]
+	it1, it2 func() iters.Iterator[int]
 	want     bool
 }{
 	{
-		goslices.Iter[[]int](nil),
-		goslices.Iter[[]int](nil),
+		func() iters.Iterator[int] { return goslices.Iter[[]int](nil) },
+		func() iters.Iterator[int] { return goslices.Iter[[]int](nil) },
 		true,
 	},
 	{
-		goslices.Iter([]int{1, 2, 3}),
-		goslices.Iter([]int{1, 2, 3}),
+		func() iters.Iterator[int] { return goslices.Iter([]int{1, 2, 3}) },
+		func() iters.Iterator[int] { return goslices.Iter([]int{1, 2, 3}) },
 		true,
 	},
 	{
-		goslices.Iter([]int{1, 1, 1}),
-		goslices.Iter([]int{1, 2, 1}),
+		func() iters.Iterator[int] { return goslices.Iter([]int{1, 1, 1}) },
+		func() iters.Iterator[int] { return goslices.Iter([]int{1, 2, 1}) },
 		false,
 	},
 	{
-		goslices.Iter([]int{1, 2, 3}),
-		goslices.Iter([]int{1, 2, 3, 4}),
+		func() iters.Iterator[int] { return goslices.Iter([]int{1, 2, 3}) },
+		func() iters.Iterator[int] { return goslices.Iter([]int{1, 2, 3, 4}) },
 		false,
 	},
 }
 
 func TestEqual(t *testing.T) {
 	for _, test := range equalTests {
-		if res := iters.Equal(test.it1, test.it2); res != test.want {
+		if res := iters.Equal(test.it1(), test.it2()); res != test.want {
 			t.Errorf("Equal(it1, it2) = %v, want = %v", res, test.want)
 		}
 	}
@@ -45,7 +45,7 @@ func TestEqual(t *testing.T) {
 
 func TestEqualFunc(t *testing.T) {
 	for _, test := range equalTests {
-		if res := iters.EqualFunc(test.it1, test.it2, gcl.Equal[int]); res != test.want {
+		if res := iters.EqualFunc(test.it1(), test.it2(), gcl.Equal[int]); res != test.want {
 			t.Errorf("Equal(it1, it2) = %v, want = %v", res, test.want)
 		}
 	}
