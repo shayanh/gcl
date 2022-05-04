@@ -12,15 +12,6 @@ type Iterator[T any] interface {
 	Next() T
 }
 
-// MutIterator defines the general interface for an iterator that
-// its values can be mutated.
-type MutIterator[T any] interface {
-	Iterator[T]
-
-	// Set replaces the last value returned by Next() with the given value.
-	Set(T)
-}
-
 // Advance advances an iterator n steps. Advance stops at any point
 // where the given iterator doesn't have next element.
 func Advance[T any](it Iterator[T], n uint) {

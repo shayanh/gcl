@@ -4,7 +4,7 @@ import (
 	"github.com/shayanh/gcl/iters"
 )
 
-func Reverse[T any](fIt iters.MutIterator[T], rIt iters.MutIterator[T], length int) {
+func Reverse[T any](fIt iters.Iterator[*T], rIt iters.Iterator[*T], length int) {
 	fIdx, rIdx := 0, length-1
 	for fIdx < rIdx {
 		if !fIt.HasNext() || !rIt.HasNext() {
@@ -12,8 +12,10 @@ func Reverse[T any](fIt iters.MutIterator[T], rIt iters.MutIterator[T], length i
 		}
 
 		fVal, rVal := fIt.Next(), rIt.Next()
-		fIt.Set(rVal)
-		rIt.Set(fVal)
+
+		tmp := *fVal
+		*fVal = *rVal
+		*rVal = tmp
 
 		fIdx += 1
 		rIdx -= 1

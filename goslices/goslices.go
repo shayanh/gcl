@@ -5,15 +5,29 @@ import (
 	"github.com/shayanh/gcl/iters"
 )
 
-func Iter[S ~[]T, T any](s S) Iterator[T] {
+func Iter[S ~[]T, T any](s S) *FrwIter[T] {
 	return &FrwIter[T]{
 		slice: s,
 		index: -1,
 	}
 }
 
-func RIter[S ~[]T, T any](s S) Iterator[T] {
+func IterMut[S ~[]T, T any](s S) *FrwIterMut[T] {
+	return &FrwIterMut[T]{
+		slice: s,
+		index: -1,
+	}
+}
+
+func RIter[S ~[]T, T any](s S) *RevIter[T] {
 	return &RevIter[T]{
+		slice: s,
+		index: len(s),
+	}
+}
+
+func RIterMut[S ~[]T, T any](s S) *RevIterMut[T] {
+	return &RevIterMut[T]{
 		slice: s,
 		index: len(s),
 	}
@@ -47,5 +61,5 @@ func Back[S ~[]T, T any](s S) T {
 }
 
 func Reverse[S ~[]T, T any](s S) {
-	internal.Reverse[T](Iter(s), RIter(s), len(s))
+	internal.Reverse[T](IterMut(s), RIterMut(s), len(s))
 }
