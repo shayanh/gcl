@@ -1,4 +1,4 @@
-# Go Generics Collections
+# Generics Collection Library
 
-Go Generics Colllections (gcl) provides a collection of data structures and
-operations on top of them.
+Generics Collection Library (gcl) provides a collection of data structures and
+operations on top of them in Go.
