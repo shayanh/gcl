@@ -87,8 +87,15 @@ func Len[T any](l *List[T]) int {
 
 // Iter returns a forward iterator to the beginning. Initially, the returned
 // iterator is located at one step before the first element (one-before-first).
-func Iter[T any](l *List[T]) Iterator[T] {
+func Iter[T any](l *List[T]) *FrwIter[T] {
 	return &FrwIter[T]{
+		node: l.head,
+		lst:  l,
+	}
+}
+
+func IterMut[T any](l *List[T]) *FrwIterMut[T] {
+	return &FrwIterMut[T]{
 		node: l.head,
 		lst:  l,
 	}
@@ -97,8 +104,15 @@ func Iter[T any](l *List[T]) Iterator[T] {
 // RIter returns a reverse iterator going from the end to the beginning.
 // Initially, the returned iterator is located at one step past the last
 // element (one-past-last).
-func RIter[T any](l *List[T]) Iterator[T] {
+func RIter[T any](l *List[T]) *RevIter[T] {
 	return &RevIter[T]{
+		node: l.tail,
+		lst:  l,
+	}
+}
+
+func RIterMut[T any](l *List[T]) *RevIterMut[T] {
+	return &RevIterMut[T]{
 		node: l.tail,
 		lst:  l,
 	}
@@ -197,13 +211,13 @@ func CompareFunc[T1 any, T2 any](l1 *List[T1], l2 *List[T2], cmp gcl.CompareFn[T
 // PushBack appends the given elements to the back of list `l`.
 // This function is O(Len(elems)). So for a single element it would be O(1).
 func PushBack[T any](l *List[T], elems ...T) {
-	Insert(RIter(l), elems...)
+	RIterMut(l).Insert(elems...)
 }
 
 // PushFront appends the given elements to the beginning of list `l`.
 // This function is O(Len(elems)). So for a single element it would be O(1).
 func PushFront[T any](l *List[T], elems ...T) {
-	Insert(Iter(l), elems...)
+	IterMut(l).Insert(elems...)
 }
 
 // PopBack deletes the last element in the list. It requires the list to be
@@ -211,7 +225,9 @@ func PushFront[T any](l *List[T], elems ...T) {
 // This function is O(1).
 func PopBack[T any](l *List[T]) {
 	require(l.size > 0, "list cannot be empty")
-	_ = Delete(RIter(l))
+	it := RIterMut(l)
+	it.Next()
+	it.Delete()
 }
 
 // PopFront deletes the last element in the list. It requires the list to be
@@ -219,7 +235,9 @@ func PopBack[T any](l *List[T]) {
 // This function is O(1).
 func PopFront[T any](l *List[T]) {
 	require(l.size > 0, "list cannot be empty")
-	_ = Delete(Iter(l))
+	it := IterMut(l)
+	it.Next()
+	it.Delete()
 }
 
 // Front returns the first element in the list. It panics if the given list is
@@ -241,7 +259,7 @@ func Back[T any](l *List[T]) T {
 // Reverse reverses the elements of the given list.
 // This function is O(n), where n is length of the list.
 func Reverse[T any](l *List[T]) {
-	internal.Reverse[T](Iter(l), RIter(l), l.size)
+	internal.Reverse[T](IterMut(l), RIterMut(l), l.size)
 }
 
 func (l *List[T]) insertBetween(node, prev, next *node[T]) {
@@ -252,31 +270,6 @@ func (l *List[T]) insertBetween(node, prev, next *node[T]) {
 	prev.next = node
 
 	l.size += 1
-}
-
-// Insert inserts the given values next after the given iterator. Direction of
-// the next is determined by the given iterator type. Insert panics if the given
-// iterator is invalid.
-// This function is O(Len(elems)). So inserting a single element would be O(1).
-func Insert[T any](it Iterator[T], elems ...T) {
-	require(it.Valid(), "iterator must be valid")
-	switch typedIt := it.(type) {
-	case *FrwIter[T]:
-		require(typedIt.node.next != nil, "bad iterator")
-		for i := len(elems) - 1; i >= 0; i-- {
-			elem := elems[i]
-			node := &node[T]{value: elem}
-			typedIt.lst.insertBetween(node, typedIt.node, typedIt.node.next)
-		}
-	case *RevIter[T]:
-		require(typedIt.node.prev != nil, "bad iterator")
-		for _, elem := range elems {
-			node := &node[T]{value: elem}
-			typedIt.lst.insertBetween(node, typedIt.node.prev, typedIt.node)
-		}
-	default:
-		panic("wrong iter type")
-	}
 }
 
 func (l *List[T]) deleteNode(node *node[T]) (*node[T], *node[T]) {
@@ -293,40 +286,6 @@ func (l *List[T]) deleteNode(node *node[T]) (*node[T], *node[T]) {
 	return prev, next
 }
 
-// Delete deletes the element that the given iterator `it` is pointing to it. The
-// iterator `it` will be invalidated and cannot be used anymore. You should use
-// the returned iterator instead. The returned iterator points to `it`'s
-// previous element and its next element is `it.Next()`.
-// Delete requires `it` to points to an actual element in the list. For example,
-// it doesn't accept Iter and RIter iterators (in their inital state) because
-// these iterators point to one-before-first and one-past-last respectively and
-// these are not actual list elements. Also, the given iterator must be valid.
-// Delete panics if `it` doesn't have the above requirements.
-// This function is O(1).
-func Delete[T any](it Iterator[T]) Iterator[T] {
-	require(it.Valid(), "iterator must be valid")
-	switch typedIt := it.(type) {
-	case *FrwIter[T]:
-		require(typedIt.node.prev != nil && typedIt.node.next != nil,
-			"bad iterator")
-		prev, _ := typedIt.lst.deleteNode(typedIt.node)
-		return &FrwIter[T]{
-			node: prev,
-			lst:  typedIt.lst,
-		}
-	case *RevIter[T]:
-		require(typedIt.node.prev != nil && typedIt.node.next != nil,
-			"bad iterator")
-		_, next := typedIt.lst.deleteNode(typedIt.node)
-		return &RevIter[T]{
-			node: next,
-			lst:  typedIt.lst,
-		}
-	default:
-		panic("wrong iter type")
-	}
-}
-
 func toSlice[T any](l *List[T]) []T {
 	var res []T
 	for it := Iter(l); it.HasNext(); {
@@ -340,10 +299,10 @@ func toSlice[T any](l *List[T]) []T {
 func Sort[T constraints.Ordered](l *List[T]) {
 	slice := toSlice(l)
 	slices.Sort(slice)
-	it := Iter(l)
+	it := IterMut(l)
 	for _, v := range slice {
-		it.Next()
-		it.Set(v)
+		itVal := it.Next()
+		*itVal = v
 	}
 }
 
@@ -354,10 +313,10 @@ func Sort[T constraints.Ordered](l *List[T]) {
 func SortFunc[T any](l *List[T], less gcl.LessFn[T]) {
 	slice := toSlice(l)
 	slices.SortFunc(slice, less)
-	it := Iter(l)
+	it := IterMut(l)
 	for _, v := range slice {
-		it.Next()
-		it.Set(v)
+		itVal := it.Next()
+		*itVal = v
 	}
 }
 
@@ -403,27 +362,27 @@ func IsSortedFunc[T any](l *List[T], less gcl.LessFn[T]) bool {
 // copy. This is like the uniq Unix command.
 // This function is O(n), where n is length of the list.
 func Compact[T comparable](l *List[T]) {
-	it1 := Iter(l).(*FrwIter[T])
+	it1 := IterMut(l)
 	if !it1.HasNext() {
 		return
 	}
-	last := it1.Next()
+	last := *it1.Next()
 	newSize := 1
 	if !it1.HasNext() {
 		return
 	}
-	it1.Next()
+	v1 := it1.Next()
 
 	it2 := Iter(l)
 	it2.Next()
 	for it2.HasNext() {
-		v := it2.Next()
-		if v != last {
-			it1.Set(v)
+		v2 := it2.Next()
+		if v2 != last {
+			*v1 = v2
 			if it1.HasNext() {
-				it1.Next()
+				v1 = it1.Next()
 			}
-			last = v
+			last = v2
 			newSize += 1
 		}
 	}
@@ -437,27 +396,27 @@ func Compact[T comparable](l *List[T]) {
 // This function is O(f * n), where n is length of the list and f is time
 // complexity of the `eq` function.
 func CompactFunc[T any](l *List[T], eq gcl.EqualFn[T, T]) {
-	it1 := Iter(l).(*FrwIter[T])
+	it1 := IterMut(l)
 	if !it1.HasNext() {
 		return
 	}
-	last := it1.Next()
+	last := *it1.Next()
 	newSize := 1
 	if !it1.HasNext() {
 		return
 	}
-	it1.Next()
+	v1 := it1.Next()
 
 	it2 := Iter(l)
 	it2.Next()
 	for it2.HasNext() {
-		v := it2.Next()
-		if !eq(v, last) {
-			it1.Set(v)
+		v2 := it2.Next()
+		if !eq(v2, last) {
+			*v1 = v2
 			if it1.HasNext() {
-				it1.Next()
+				v1 = it1.Next()
 			}
-			last = v
+			last = v2
 			newSize += 1
 		}
 	}
@@ -502,7 +461,7 @@ func IndexFunc[T comparable](l *List[T], pred func(T) bool) int {
 // Pos returns an iterator pointing to the first occurrence of v in l.
 // The returned boolean value indicates if v is present in the list.
 // This function is O(n), where n is length of the list.
-func Pos[T comparable](l *List[T], v T) (Iterator[T], bool) {
+func Pos[T comparable](l *List[T], v T) (*FrwIter[T], bool) {
 	it := Iter(l)
 	for it.HasNext() {
 		if it.Next() == v {

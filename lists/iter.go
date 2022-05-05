@@ -1,16 +1,5 @@
 package lists
 
-// Iterator defines the general list iterator interface.
-type Iterator[T any] interface {
-	HasNext() bool
-	Next() T
-	Set(T)
-
-	// Valid reports whether the iterator is valid. An iterator might get
-	// invalid via a Delete call.
-	Valid() bool
-}
-
 func require(check bool, failMsg string) {
 	if !check {
 		panic(failMsg)
@@ -31,22 +20,48 @@ func (it *FrwIter[T]) HasNext() bool {
 }
 
 func (it *FrwIter[T]) Next() T {
-	require(it.Valid(), "iterator must be valid")
 	require(it.HasNext(), "iterator must have next")
 
 	it.node = it.node.next
 	return it.node.value
 }
 
-func (it *FrwIter[T]) Set(val T) {
-	require(it.Valid(), "iterator must be valid")
-	require(it.node != it.lst.head && it.node != it.lst.tail, "iterator must have a value")
-
-	it.node.value = val
+type FrwIterMut[T any] struct {
+	node *node[T]
+	lst  *List[T]
 }
 
-func (it *FrwIter[T]) Valid() bool {
-	return it.node != nil
+func (it *FrwIterMut[T]) HasNext() bool {
+	if it.node == nil {
+		return false
+	}
+	return it.node.next != it.lst.tail
+}
+
+func (it *FrwIterMut[T]) Next() *T {
+	require(it.HasNext(), "iterator must have next")
+
+	it.node = it.node.next
+	return &it.node.value
+}
+
+func (it *FrwIterMut[T]) Insert(elems ...T) {
+	require(it.node.next != nil, "bad iterator")
+	for i := len(elems) - 1; i >= 0; i-- {
+		elem := elems[i]
+		node := &node[T]{value: elem}
+		it.lst.insertBetween(node, it.node, it.node.next)
+	}
+}
+
+func (it *FrwIterMut[T]) Delete() {
+	require(it.node.prev != nil && it.node.next != nil,
+		"bad iterator")
+	prev, _ := it.lst.deleteNode(it.node)
+	it = &FrwIterMut[T]{
+		node: prev,
+		lst:  it.lst,
+	}
 }
 
 // RevIter is a reverse iterator.
@@ -63,21 +78,45 @@ func (it *RevIter[T]) HasNext() bool {
 }
 
 func (it *RevIter[T]) Next() T {
-	require(it.Valid(), "iterator must be valid")
 	require(it.HasNext(), "iterator must have next")
 
 	it.node = it.node.prev
 	return it.node.value
 }
 
-func (it *RevIter[T]) Set(val T) {
-	require(it.Valid(), "iterator must be valid")
-	require(it.node != it.lst.head && it.node != it.lst.tail,
-		"iterator must have a value")
-
-	it.node.value = val
+type RevIterMut[T any] struct {
+	node *node[T]
+	lst  *List[T]
 }
 
-func (it *RevIter[T]) Valid() bool {
-	return it.node != nil
+func (it *RevIterMut[T]) HasNext() bool {
+	if it.node == nil {
+		return false
+	}
+	return it.node.prev != it.lst.head
+}
+
+func (it *RevIterMut[T]) Next() *T {
+	require(it.HasNext(), "iterator must have next")
+
+	it.node = it.node.prev
+	return &it.node.value
+}
+
+func (it *RevIterMut[T]) Insert(elems ...T) {
+	require(it.node.prev != nil, "bad iterator")
+	for _, elem := range elems {
+		node := &node[T]{value: elem}
+		it.lst.insertBetween(node, it.node.prev, it.node)
+	}
+}
+
+func (it *RevIterMut[T]) Delete() {
+	require(it.node.prev != nil && it.node.next != nil,
+		"bad iterator")
+	_, next := it.lst.deleteNode(it.node)
+	it = &RevIterMut[T]{
+		node: next,
+		lst:  it.lst,
+	}
 }
