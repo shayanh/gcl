@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/shayanh/gcl/iters"
@@ -25,48 +26,50 @@ func main() {
 	lists.PopBack(lst)
 	printList(lst)
 
-	// reducer := iters.Reduce[int]
-	// sum := reducer(lists.Iter(lst), func(a, b int) int {
-	// 	return a + b
-	// })
-	// fmt.Println("sum =", sum)
+	reducer := iters.Reduce[int]
+	sum := reducer(lists.Iter(lst), func(a, b int) int {
+		return a + b
+	})
+	fmt.Println("sum =", sum)
 
-	// lists.Insert(lists.Iter(lst), 11, 12)
-	// printList(lst)
+	it1 := lists.IterMut(lst)
+	it1.Insert(11, 12)
+	printList(lst)
 
-	// lists.Insert(lists.RIter(lst), 13, 14)
-	// printList(lst)
+	it2 := lists.RIterMut(lst)
+	it2.Insert(13, 14)
+	printList(lst)
 
-	// it := iters.Map[int](lists.Iter(lst), func(t int) int {
-	// 	return t * 2
-	// })
-	// lst2 := lists.FromIter(it)
-	// printList(lst2)
+	it := iters.Map[int](lists.Iter(lst), func(t int) int {
+		return t * 2
+	})
+	lst2 := lists.FromIter(it)
+	printList(lst2)
 
-	// f := func(t int) bool {
-	// 	return t%2 == 0
-	// }
-	// g := func(t int) {
-	// 	fmt.Print(t, ", ")
-	// }
-	// iters.ForEach(iters.Filter[int](lists.Iter(lst), f), g)
-	// fmt.Println()
+	f := func(t int) bool {
+		return t%2 == 0
+	}
+	g := func(t int) {
+		fmt.Print(t, ", ")
+	}
+	iters.ForEach(iters.Filter[int](lists.Iter(lst), f), g)
+	fmt.Println()
 
-	// lists.Sort(lst)
-	// printList(lst)
+	lists.Sort(lst)
+	printList(lst)
 
-	// fmt.Println(lst)
+	fmt.Println(lst)
 
-	// a, err := json.Marshal(lst)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(string(a))
+	a, err := json.Marshal(lst)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(a))
 
-	// var lst3 *lists.List[int]
-	// err = json.Unmarshal(a, &lst3)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(lst3)
+	var lst3 *lists.List[int]
+	err = json.Unmarshal(a, &lst3)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(lst3)
 }
