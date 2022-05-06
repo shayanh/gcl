@@ -18,7 +18,12 @@ func printList[T any](lst *lists.List[T]) {
 
 func main() {
 	lst := lists.New(1, 2, 7)
+	printList(lst)
+
 	lists.PushFront(lst, -9)
+	printList(lst)
+
+	lists.PopBack(lst)
 	printList(lst)
 
 	reducer := iters.Reduce[int]
@@ -27,10 +32,12 @@ func main() {
 	})
 	fmt.Println("sum =", sum)
 
-	lists.Insert(lists.Iter(lst), 11, 12)
+	it1 := lists.IterMut(lst)
+	it1.Insert(11, 12)
 	printList(lst)
 
-	lists.Insert(lists.RIter(lst), 13, 14)
+	it2 := lists.RIterMut(lst)
+	it2.Insert(13, 14)
 	printList(lst)
 
 	it := iters.Map[int](lists.Iter(lst), func(t int) int {
