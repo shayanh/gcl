@@ -7,15 +7,15 @@ import (
 )
 
 // ForEach calls a function on each element of an iterator. ForEach moves the
-// given iterator `it` to its end such that after a ForEach call `it.HasNext()`
-// will be false.
+// given iterator it to its end such that after a ForEach call it.HasNext() will
+// be false.
 func ForEach[T any](it Iterator[T], fn func(T)) {
 	for it.HasNext() {
 		fn(it.Next())
 	}
 }
 
-// Equal determines of the elements of two iterators are equal. It returns true
+// Equal determines if the elements of two iterators are equal. It returns true
 // if all elements are equal and both iterators have the same number of
 // elements. If the first iterator has l1 elements and the second iterator has
 // l2 elements, Equal advances each iterator min(l1, l2) steps.
@@ -33,7 +33,7 @@ func Equal[T comparable](it1, it2 Iterator[T]) bool {
 	return true
 }
 
-// EqualFunc works the same as Equal, but it gives the function eq for element
+// EqualFunc works the same as Equal, but it uses the function eq for element
 // comparison.
 func EqualFunc[T1 any, T2 any](it1 Iterator[T1], it2 Iterator[T2], eq gcl.EqualFn[T1, T2]) bool {
 	for it1.HasNext() && it2.HasNext() {
@@ -62,10 +62,9 @@ func (it *mapIter[T, V]) Next() V {
 	return it.fn(it.wrappedIt.Next())
 }
 
-// Map applies the function `fn` on elements the given iterator `it` and
-// returns a new iterator over the mapped variables. Map moves the given
-// iterator `it` to its end such that after a Map call `it.HasNext()` will be
-// false.
+// Map applies the function fn on elements the given iterator it and returns a
+// new iterator over the mapped values. Map moves the given iterator it to its
+// end such that after a Map call it.HasNext() will be false.
 // Map is lazy, in a way that if you don't consume the returned iterator
 // nothing will happen.
 func Map[T any, V any](it Iterator[T], fn func(T) V) Iterator[V] {
@@ -74,8 +73,8 @@ func Map[T any, V any](it Iterator[T], fn func(T) V) Iterator[V] {
 
 // Reduce applies a function of two arguments cumulatively to the items of
 // the given iterator from the beginning to the end.
-// Reduce moves the given iterator `it` to its end such that after a Reduce
-// call, `it.HasNext()` will be false.
+// Reduce moves the given iterator it to its end such that after a Reduce
+// call, it.HasNext() will be false.
 func Reduce[T any](it Iterator[T], fn func(T, T) T) (acc T) {
 	if !it.HasNext() {
 		return
@@ -90,8 +89,8 @@ func Reduce[T any](it Iterator[T], fn func(T, T) T) (acc T) {
 // Fold applies a function of two arguments cumulatively to the items of
 // the given iterator from the beginning to the end. Fold gives an initial
 // value and start its operation by using the initial value.
-// Fold moves the given iterator `it` to its end such that after a Fold
-// call `it.HasNext()` will be false.
+// Fold moves the given iterator it to its end such that after a Fold
+// call it.HasNext() will be false.
 func Fold[T any, V any](it Iterator[T], fn func(V, T) V, init V) (acc V) {
 	acc = init
 	for it.HasNext() {
@@ -150,7 +149,7 @@ func (it *filterIter[T]) Next() T {
 
 // Filter filters elements of an iterator that satisfy the pred.
 // Filter returns an iterator over the filtered elements. Filter moves the given
-// iterator `it` to its end such that after a Filter call `it.HasNext()` will be
+// iterator it to its end such that after a Filter call it.HasNext() will be
 // false.
 // Filter is lazy, in a way that if you don't consume the returned iterator
 // nothing will happen.
@@ -158,10 +157,10 @@ func Filter[T any](it Iterator[T], pred func(T) bool) Iterator[T] {
 	return &filterIter[T]{wrappedIt: it, pred: pred}
 }
 
-// Find returns the first element in an iterator that satisfies pred.
-// The returned boolean value indicates if such an element exists.
-// If it exists the given iterator `it` advances the element, otherwise
-// Filter moves to its end.
+// Find returns the first element in an iterator that satisfies pred. The
+// returned boolean value indicates if such an element exists. If a satisfying
+// element exists, the given iterator it advances the first satisfying element
+// by one step, otherwise Find moves the iterator it to its end.
 func Find[T any](it Iterator[T], pred func(T) bool) (t T, ok bool) {
 	ok = false
 	for it.HasNext() {
@@ -175,8 +174,8 @@ func Find[T any](it Iterator[T], pred func(T) bool) (t T, ok bool) {
 }
 
 // Max returns the maximum element in an iterator of any ordered type.
-// Max moves the given iterator `it` to its end such that after a Max
-// call `it.HasNext()` will be false.
+// Max moves the given iterator it to its end such that after a Max
+// call it.HasNext() will be false.
 func Max[T constraints.Ordered](it Iterator[T]) (max T) {
 	if !it.HasNext() {
 		return
@@ -192,9 +191,9 @@ func Max[T constraints.Ordered](it Iterator[T]) (max T) {
 }
 
 // MaxFunc returns the maximum element in an iterator and uses the given
-// `less` function for comparison.
-// MaxFunc moves the given iterator `it` to its end such that after a MaxFunc
-// call `it.HasNext()` will be false.
+// less function for comparison.
+// MaxFunc moves the given iterator it to its end such that after a MaxFunc
+// call it.HasNext() will be false.
 func MaxFunc[T any](it Iterator[T], less gcl.LessFn[T]) (max T) {
 	if !it.HasNext() {
 		return
@@ -210,8 +209,8 @@ func MaxFunc[T any](it Iterator[T], less gcl.LessFn[T]) (max T) {
 }
 
 // Min returns the minimum element in an iterator of any ordered type.
-// Min moves the given iterator `it` to its end such that after a Min
-// call `it.HasNext()` will be false.
+// Min moves the given iterator it to its end such that after a Min
+// call it.HasNext() will be false.
 func Min[T constraints.Ordered](it Iterator[T]) (min T) {
 	if !it.HasNext() {
 		return
@@ -227,9 +226,9 @@ func Min[T constraints.Ordered](it Iterator[T]) (min T) {
 }
 
 // MinFunc returns the minimum element in an iterator and uses the given
-// `less` function for comparison.
-// MinFunc moves the given iterator `it` to its end such that after a MinFunc
-// call `it.HasNext()` will be false.
+// less function for comparison.
+// MinFunc moves the given iterator it to its end such that after a MinFunc
+// call it.HasNext() will be false.
 func MinFunc[T constraints.Ordered](it Iterator[T], less gcl.LessFn[T]) (min T) {
 	if !it.HasNext() {
 		return
@@ -245,8 +244,8 @@ func MinFunc[T constraints.Ordered](it Iterator[T], less gcl.LessFn[T]) (min T) 
 }
 
 // Sum returns sum of the elements in an iterator of any numeric type.
-// Sum moves the given iterator `it` to its end such that after a Sum
-// call `it.HasNext()` will be false.
+// Sum moves the given iterator it to its end such that after a Sum
+// call it.HasNext() will be false.
 func Sum[T gcl.Number](it Iterator[T]) (sum T) {
 	sum = 0
 	for it.HasNext() {
@@ -271,6 +270,8 @@ func (it *zipIter[T1, T2]) Next() gcl.Zipped[T1, T2] {
 	}
 }
 
+// Zip zips the two given iterators and returns a single iterator over
+// gcl.Zipped values.
 func Zip[T1 any, T2 any](it1 Iterator[T1], it2 Iterator[T2]) Iterator[gcl.Zipped[T1, T2]] {
 	return &zipIter[T1, T2]{
 		it1: it1,

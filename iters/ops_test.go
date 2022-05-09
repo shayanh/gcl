@@ -182,3 +182,90 @@ func TestFold(t *testing.T) {
 		}
 	}
 }
+
+var filterTests = []struct {
+	it   iters.Iterator[int]
+	fn   func(int) bool
+	want iters.Iterator[int]
+}{
+	{
+		goslices.Iter([]int{1, 2, 3, 4}),
+		func(n int) bool {
+			return n%2 == 0
+		},
+		goslices.Iter([]int{2, 4}),
+	},
+	{
+		goslices.Iter([]int{}),
+		func(n int) bool {
+			return n%2 == 0
+		},
+		goslices.Iter([]int{}),
+	},
+}
+
+func TestFilter(t *testing.T) {
+	for _, test := range filterTests {
+		got := iters.Filter(test.it, test.fn)
+		if !iters.Equal(got, test.want) {
+			t.Errorf("Wrong Filter result")
+		}
+		if test.it.HasNext() {
+			t.Errorf("it.HasNext() must be false")
+		}
+	}
+}
+
+var findTests = []struct {
+	it      iters.Iterator[int]
+	fn      func(int) bool
+	wantVal int
+	wantOk  bool
+}{
+	{
+		goslices.Iter([]int{1, 2, 3, 4}),
+		func(n int) bool {
+			return n%2 == 0
+		},
+		2,
+		true,
+	},
+	{
+		goslices.Iter([]int{}),
+		func(n int) bool {
+			return n%2 == 0
+		},
+		0,
+		false,
+	},
+}
+
+func TestFind(t *testing.T) {
+	for _, test := range findTests {
+		val, ok := iters.Find(test.it, test.fn)
+		if val != test.wantVal || ok != test.wantOk {
+			t.Errorf("Wrong Find result")
+		}
+	}
+}
+
+func TestZip(t *testing.T) {
+	it1 := goslices.Iter([]int{1, 2})
+	it2 := goslices.Iter([]string{"a", "b", "c"})
+	zipped := iters.Zip[int, string](it1, it2)
+
+	want := goslices.Iter([]gcl.Zipped[int, string]{
+		{First: 1, Second: "a"},
+		{First: 2, Second: "b"},
+	})
+
+	if !iters.Equal[gcl.Zipped[int, string]](zipped, want) {
+		t.Error("Wrong Zip result")
+	}
+	if it1.HasNext() {
+		t.Errorf("it1.HasNext() must be false")
+	}
+	if !it2.HasNext() {
+		t.Errorf("it2.HasNext() must be true")
+	}
+}

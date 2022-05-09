@@ -85,7 +85,7 @@ func Len[T any](l *List[T]) int {
 	return l.size
 }
 
-// Iter returns a forward iterator to the beginning. Initially, the returned
+// Iter returns an forward iterator to the beginning. Initially, the returned
 // iterator is located at one step before the first element (one-before-first).
 func Iter[T any](l *List[T]) *FrwIter[T] {
 	return &FrwIter[T]{
@@ -94,6 +94,9 @@ func Iter[T any](l *List[T]) *FrwIter[T] {
 	}
 }
 
+// IterMut returns a forward iterator to the beginning with mutable pointers.
+// Initially, the returned iterator is located at one step before the first
+// element (one-before-first).
 func IterMut[T any](l *List[T]) *FrwIterMut[T] {
 	return &FrwIterMut[T]{
 		node: l.head,
@@ -102,8 +105,8 @@ func IterMut[T any](l *List[T]) *FrwIterMut[T] {
 }
 
 // RIter returns a reverse iterator going from the end to the beginning.
-// Initially, the returned iterator is located at one step past the last
-// element (one-past-last).
+// Initially, the returned iterator is located at one step past the last element
+// (one-past-last).
 func RIter[T any](l *List[T]) *RevIter[T] {
 	return &RevIter[T]{
 		node: l.tail,
@@ -111,6 +114,9 @@ func RIter[T any](l *List[T]) *RevIter[T] {
 	}
 }
 
+// RIterMut returns a reverse iterator going from the end to the beginning with
+// mutable pointers. Initially, the returned iterator is located at one step
+// past the last element (one-past-last).
 func RIterMut[T any](l *List[T]) *RevIterMut[T] {
 	return &RevIterMut[T]{
 		node: l.tail,
@@ -230,7 +236,7 @@ func PopBack[T any](l *List[T]) {
 	it.Delete()
 }
 
-// PopFront deletes the last element in the list. It requires the list to be
+// PopFront deletes the first element in the list. It requires the list to be
 // non-empty, otherwise it panics.
 // This function is O(1).
 func PopFront[T any](l *List[T]) {

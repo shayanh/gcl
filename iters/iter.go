@@ -1,5 +1,5 @@
-// Package iters defines the general iterator interface and provides operations
-// on the given iterators.
+// Package iters defines the general iterator interface and provides different
+// operations on top of them.
 package iters
 
 // Iterator defines the general iterator interface. Iterator makes it
@@ -13,7 +13,7 @@ type Iterator[T any] interface {
 }
 
 // Advance advances an iterator n steps. Advance stops at any point
-// where the given iterator doesn't have next element.
+// where the given iterator doesn't have a next element.
 func Advance[T any](it Iterator[T], n uint) {
 	var i uint
 	for i = 0; i < n && it.HasNext(); i++ {

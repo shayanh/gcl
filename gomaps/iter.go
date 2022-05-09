@@ -6,6 +6,7 @@ import (
 	"github.com/shayanh/gcl"
 )
 
+// Iterator is an iterator for built-in go maps.
 type Iterator[K comparable, V any] struct {
 	impl    *reflect.MapIter
 	hasNext bool

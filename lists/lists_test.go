@@ -1,6 +1,7 @@
 package lists
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -357,5 +358,24 @@ func TestPos(t *testing.T) {
 				t.Errorf("Pos(%v, %v) iterator HasNext = %v, want %v", test.l, test.v, next, test.next)
 			}
 		}
+	}
+}
+
+func TestJSONSerialization(t *testing.T) {
+	lst1 := New(1, 2, 3)
+
+	m, err := json.Marshal(lst1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var lst2 *List[int]
+	err = json.Unmarshal(m, &lst2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !Equal(lst1, lst2) {
+		t.Error("Wrong JSON serialization")
 	}
 }
